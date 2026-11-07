@@ -65,6 +65,14 @@ class SessionStore(Protocol):
 
     def delete(self, session_id: str, owner: str | None = None) -> bool: ...
 
+    def spent_since(self, since: datetime) -> float:
+        """LLM spend (INR) recorded by turns asked at or after `since`, across all sessions."""
+        ...
+
+    def prune(self, inactive_before: datetime) -> int:
+        """Delete sessions with no activity since `inactive_before`; returns how many."""
+        ...
+
 
 class InMemorySessionStore:
     def __init__(self) -> None:
@@ -103,6 +111,15 @@ class InMemorySessionStore:
             return False
         del self._turns[session_id], self._owners[session_id]
         return True
+
+    def spent_since(self, since: datetime) -> float:
+        return sum(t.cost_inr for turns in self._turns.values() for t in turns if t.asked_at >= since)
+
+    def prune(self, inactive_before: datetime) -> int:
+        stale = [sid for sid, turns in self._turns.items() if turns and turns[-1].asked_at < inactive_before]
+        for sid in stale:
+            del self._turns[sid], self._owners[sid]
+        return len(stale)
 
 
 def _uuid(session_id: str) -> uuid.UUID:
@@ -200,6 +217,21 @@ class SqlSessionStore:
             s.query(ChatTurn).filter(ChatTurn.session_id == _uuid(session_id)).delete()
             s.query(ChatSession).filter(ChatSession.id == _uuid(session_id)).delete()
         return True
+
+    def spent_since(self, since: datetime) -> float:
+        with session_scope(self.factory) as s:
+            total = s.scalar(
+                select(func.coalesce(func.sum(ChatTurn.cost_inr), 0.0)).where(ChatTurn.asked_at >= since)
+            )
+            return float(total or 0.0)
+
+    def prune(self, inactive_before: datetime) -> int:
+        with session_scope(self.factory) as s:
+            ids = list(s.scalars(select(ChatSession.id).where(ChatSession.updated_at < inactive_before)))
+            if ids:
+                s.query(ChatTurn).filter(ChatTurn.session_id.in_(ids)).delete(synchronize_session=False)
+                s.query(ChatSession).filter(ChatSession.id.in_(ids)).delete(synchronize_session=False)
+            return len(ids)
 
 
 def _record(r: ChatTurn) -> TurnRecord:

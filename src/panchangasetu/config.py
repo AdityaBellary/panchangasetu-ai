@@ -114,6 +114,15 @@ class Settings(BaseSettings):
     api_port: int = Field(8000, ge=1, le=65535)
     api_rate_limit_per_minute: int = Field(30, ge=1)  # per API key; a key can carry its own limit
     api_max_question_chars: int = Field(500, ge=10)
+    api_metrics_token: SecretStr | None = None  # required by /metrics when set
+
+    # --- operations ---
+    # LLM spend allowed per local day (INR, all users together); 0 = unlimited. Calendar lookups are
+    # answered by template for free and keep working when it is used up.
+    llm_daily_budget_inr: float = Field(25.0, ge=0)
+    # Conversations with no activity for this many days are deleted by `psetu sessions prune` (also run
+    # when the server starts). 0 keeps them forever.
+    session_retention_days: int = Field(180, ge=0)
 
     # --- chunking ------------------------------------------------------------------------
     chunk_min_tokens: int = Field(30, ge=0)

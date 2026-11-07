@@ -1,0 +1,13 @@
+# Data, models and secrets are mounted at runtime, never baked into the image.
+.env
+data/
+.git/
+.venv/
+.claude/
+**/__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+eval/reports/

@@ -163,3 +163,14 @@ def test_api_keys_are_stored_hashed_and_can_be_revoked() -> None:
 )
 def test_tithi_numbers_drive_the_moon_phase(name: str, paksha: str | None, number: int) -> None:
     assert tithi_number(name, paksha) == number
+
+
+def test_metrics_endpoint_counts_routes_by_template_and_honours_its_token(api: TestClient) -> None:
+    sid = api.post("/v1/chat", json={"question": "When is Deepavali?"}, headers=ALICE).json()["session_id"]
+    api.get(f"/v1/sessions/{sid}", headers=ALICE)
+    text = api.get("/metrics").text
+    assert 'route="/v1/sessions/{session_id}"' in text and sid not in text
+    services = ApiServices(conversations=None, keys=FakeKeys(), metrics_token="s3cret")  # type: ignore[arg-type]
+    guarded = TestClient(create_app(services))
+    assert guarded.get("/metrics").status_code == 401
+    assert guarded.get("/metrics", headers={"Authorization": "Bearer s3cret"}).status_code == 200

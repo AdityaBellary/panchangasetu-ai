@@ -1,0 +1,71 @@
+# Lint, type-check and test every push and pull request; check that the Docker image builds.
+# No secrets are used: tests run on fakes and in-memory Qdrant, and anything that would call Sarvam
+# (marker `sarvam`) is excluded. Tests needing local data or models skip themselves.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.23"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - run: uv run mypy src
+
+  tests:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          POSTGRES_USER: psetu
+          POSTGRES_PASSWORD: psetu
+          POSTGRES_DB: psetu
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U psetu -d psetu"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      PSETU_TEST_DATABASE_URL: postgresql+psycopg://psetu:psetu@localhost:5432/psetu
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tesseract (Telugu)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-tel
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.23"
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run pytest -m "not sarvam" --cov=panchangasetu --cov-report=term-missing:skip-covered
+
+  docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: panchangasetu:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

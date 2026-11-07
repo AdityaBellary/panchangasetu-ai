@@ -11,6 +11,7 @@ from sqlalchemy import func, select
 
 from panchangasetu.config import Settings, get_settings
 from panchangasetu.conversation.service import ConversationService
+from panchangasetu.conversation.store import SessionStore
 from panchangasetu.generation.answerer import Answer, AnswerService
 from panchangasetu.ingestion.pipeline import IngestionPipeline
 from panchangasetu.observability.logging import configure_logging
@@ -217,6 +218,7 @@ def build_conversation_service(settings: Settings) -> ConversationService:
         resolver,
         history_turns=settings.conversation_history_turns,
         idle_minutes=settings.conversation_idle_minutes,
+        daily_budget_inr=settings.llm_daily_budget_inr,
     )
 
 
@@ -286,9 +288,32 @@ def cmd_serve(settings: Settings, args: argparse.Namespace) -> int:
     from panchangasetu.api.server import build_services
 
     host, port = args.host or settings.api_host, args.port or settings.api_port
-    app = create_app(build_services(settings))  # loads the embedder before accepting requests
+    services = build_services(settings)  # loads the embedder before accepting requests
+    if settings.session_retention_days:
+        pruned = _prune_sessions(services.conversations.store, settings)
+        if pruned:
+            print(
+                f"Deleted {pruned} conversation(s) inactive for over {settings.session_retention_days} days."
+            )
+    app = create_app(services)
     print(f"PanchangaSetu: web chat at http://{host}:{port}/  (API docs at /docs)")
     uvicorn.run(app, host=host, port=port, log_level="warning")
+    return 0
+
+
+def _prune_sessions(store: SessionStore, settings: Settings, days: int | None = None) -> int:
+    from datetime import UTC, datetime, timedelta
+
+    keep = settings.session_retention_days if days is None else days
+    return store.prune(datetime.now(UTC) - timedelta(days=keep)) if keep > 0 else 0
+
+
+def cmd_sessions(settings: Settings, args: argparse.Namespace) -> int:
+    from panchangasetu.conversation.store import SqlSessionStore
+
+    store = SqlSessionStore(make_session_factory(make_engine(settings.database_url)))
+    n = _prune_sessions(store, settings, args.days)
+    print(f"Deleted {n} conversation(s).")
     return 0
 
 
@@ -467,6 +492,11 @@ def main(argv: list[str] | None = None) -> int:
     keys.add_parser("list", help="list keys (never shows the keys themselves)")
     kr = keys.add_parser("revoke", help="revoke a key by id or prefix")
     kr.add_argument("key_id")
+    ss = sub.add_parser("sessions", help="manage stored conversations").add_subparsers(
+        dest="sessions_cmd", required=True
+    )
+    pr = ss.add_parser("prune", help="delete conversations inactive for longer than the retention period")
+    pr.add_argument("--days", type=int, help="default PSETU_SESSION_RETENTION_DAYS (180)")
     sub.add_parser("status", help="show ingestion status per document")
     sp = sub.add_parser("show-page", help="print the extracted text of one page")
     sp.add_argument("document")
@@ -488,6 +518,7 @@ def main(argv: list[str] | None = None) -> int:
         "show-page": cmd_show_page,
         "serve": cmd_serve,
         "api-keys": cmd_api_keys,
+        "sessions": cmd_sessions,
     }
     return handlers[args.cmd](settings, args)
 

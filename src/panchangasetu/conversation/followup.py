@@ -301,10 +301,14 @@ class FollowUpResolver:
         self.max_tokens = max_tokens
         self.last_cost_tokens: tuple[int, int] = (0, 0)
 
-    def resolve(self, question: str, history: Sequence[TurnRecord], now: datetime) -> Resolution:
+    def resolve(
+        self, question: str, history: Sequence[TurnRecord], now: datetime, *, allow_llm: bool = True
+    ) -> Resolution:
         self.last_cost_tokens = (0, 0)
         res = resolve_by_rules(question, history, now.date())
-        if res.method != "none" or not history or self.llm is None or not needs_context(question, now.date()):
+        if res.method != "none" or not history or self.llm is None or not allow_llm:
+            return res
+        if not needs_context(question, now.date()):
             return res
         return self._llm(question, history)
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import create_engine
@@ -195,3 +195,51 @@ def test_service_rejects_unknown_or_foreign_sessions() -> None:
     sid = svc.start(owner="client-a")
     with pytest.raises(SessionNotFound):
         svc.ask("hi", session_id=sid, owner="client-b", now=NOW)
+
+
+# ------------------------------------------------------------------ operations: budget and retention
+@pytest.mark.parametrize("make", [InMemorySessionStore, _sql_store])
+def test_spend_and_pruning(make: type) -> None:
+    store = make()
+    old, new = store.create(), store.create()
+    t_old = turn("old")
+    t_old.asked_at, t_old.cost_inr = NOW - timedelta(days=200), 0.5
+    t_new = turn("new")
+    t_new.cost_inr = 0.25
+    store.add_turn(old, t_old)
+    store.add_turn(new, t_new)
+    assert store.spent_since(NOW - timedelta(hours=1)) == pytest.approx(0.25)
+    assert store.spent_since(NOW - timedelta(days=365)) == pytest.approx(0.75)
+    if isinstance(store, InMemorySessionStore):
+        assert store.prune(NOW - timedelta(days=180)) == 1
+        assert not store.exists(old) and store.exists(new)
+    else:  # SQL prunes on the session's last activity (set when a turn is stored)
+        assert store.prune(datetime.now(UTC) - timedelta(days=1)) == 0
+        assert store.prune(datetime.now(UTC) + timedelta(days=1)) == 2
+        assert not store.exists(old) and not store.exists(new)
+
+
+def test_daily_budget_stops_llm_answers_but_not_calendar_templates() -> None:
+    from panchangasetu.generation.prompts import BUDGET_EN
+
+    llm = FakeLLM([reply("Kuja dosha does not apply when Mars is with Jupiter.")])
+    retriever = FakeRetriever([PROSE], PanchangaMode.NONE, Intent.GENERAL, [])
+    svc = ConversationService(AnswerService(retriever, llm), InMemorySessionStore(), daily_budget_inr=0.02)  # type: ignore[arg-type]
+    first = svc.ask("What is Kuja dosha?", now=NOW)
+    assert first.method == "llm" and first.cost_inr >= 0.02
+    second = svc.ask("What is Kuja dosha?", now=NOW + timedelta(minutes=1))
+    assert second.abstained and second.answer == BUDGET_EN and llm.calls == 1
+    tomorrow = svc.ask("What is Kuja dosha?", now=NOW + timedelta(days=1))
+    assert tomorrow.method == "llm"
+
+
+def test_answer_metrics_are_recorded_without_question_text() -> None:
+    from prometheus_client import generate_latest
+
+    from panchangasetu.observability.metrics import REGISTRY
+
+    svc = _service(FakeLLM([reply("x")]), FakeRetriever([PROSE], PanchangaMode.NONE, Intent.GENERAL, []))
+    svc.ask("What is Kuja dosha secret-question?", now=NOW)
+    text = generate_latest(REGISTRY).decode()
+    assert 'psetu_answers_total{language="en",method="llm"}' in text
+    assert "psetu_llm_cost_inr_total" in text and "secret-question" not in text

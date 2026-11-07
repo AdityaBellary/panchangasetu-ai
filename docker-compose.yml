@@ -1,4 +1,6 @@
-# Local development stack. Redis, API and worker services are added in later phases.
+# Local stack: Postgres, Qdrant and the PanchangaSetu API + web chat.
+#   docker compose up -d postgres qdrant     # dev: run the app from the venv
+#   docker compose up -d --build api         # or run the app in a container too (http://127.0.0.1:8000)
 services:
   postgres:
     image: postgres:17.6-alpine
@@ -27,6 +29,24 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+
+  api:
+    build: .
+    image: panchangasetu:local
+    env_file: .env  # SARVAM_API_KEY / OPENAI_API_KEY and any PSETU_* overrides
+    environment:
+      PSETU_DATABASE_URL: postgresql+psycopg://psetu:psetu@postgres:5432/psetu
+      PSETU_QDRANT_URL: http://qdrant:6333
+    ports:
+      - "127.0.0.1:${PSETU_API_HOST_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data  # PDFs, page images, OCR cache, embedding models (data/models)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pgdata:

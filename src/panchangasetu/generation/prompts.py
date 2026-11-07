@@ -10,6 +10,15 @@ from panchangasetu.retrieval.evidence import Evidence
 
 ABSTAIN_EN = "I don't have enough information in the available documents to answer this question accurately."
 ABSTAIN_TE = "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు."
+# The daily LLM budget is used up: calendar lookups (templates) still work.
+BUDGET_EN = (
+    "Today's limit for detailed answers has been reached. Calendar questions (tithi, nakshatram, "
+    "rahukalam, the next Ekadashi) still work now; ask this one again tomorrow."
+)
+BUDGET_TE = (
+    "ఈరోజు వివరణాత్మక సమాధానాల పరిమితి పూర్తయింది. తిథి, నక్షత్రం, రాహుకాలం, తదుపరి ఏకాదశి వంటి "
+    "క్యాలెండర్ ప్రశ్నలకు ఇప్పుడూ సమాధానం లభిస్తుంది; ఈ ప్రశ్నను రేపు మళ్ళీ అడగండి."
+)
 
 SYSTEM = """You are PanchangaSetu, an assistant that answers questions about the TTD (Tirumala Tirupati \
 Devasthanams) panchangam and calendar documents.

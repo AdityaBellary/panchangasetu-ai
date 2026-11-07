@@ -3,6 +3,7 @@
   GET  /                      web chat UI (static; it asks for an API key and keeps it in the browser)
   GET  /healthz               liveness (no auth)
   GET  /readyz                database and vector index reachable (no auth)
+  GET  /metrics               Prometheus metrics (bearer token when PSETU_API_METRICS_TOKEN is set)
   POST /v1/chat               ask a question, optionally continuing a session
   GET  /v1/sessions           this client's conversations, most recent first
   GET  /v1/sessions/{id}      one conversation's turns
@@ -29,6 +30,7 @@ from urllib.parse import quote
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel, Field
 
 from panchangasetu.api.keys import Client
@@ -36,6 +38,7 @@ from panchangasetu.conversation.service import ConversationService
 from panchangasetu.conversation.store import SessionNotFound
 from panchangasetu.generation.answerer import Answer
 from panchangasetu.observability.logging import get_logger
+from panchangasetu.observability.metrics import HTTP_REQUESTS, HTTP_SECONDS, REGISTRY
 
 log = get_logger(__name__)
 STATIC_DIR = Path(__file__).parent / "static"
@@ -58,6 +61,7 @@ class ApiServices:
     today: Callable[[], dict[str, Any]] | None = None
     rate_limit_per_minute: int = 30
     max_question_chars: int = 500
+    metrics_token: str | None = None
 
 
 # ------------------------------------------------------------------ schemas
@@ -200,14 +204,19 @@ def create_app(services: ApiServices) -> FastAPI:
                 "default-src 'self'; img-src 'self' blob: data:; style-src 'self'; script-src 'self'; "
                 "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'"
             )
+        elapsed = time.perf_counter() - t0
         if request.url.path.startswith("/v1/"):
+            # Route template, not the raw path: session ids and document names must not become labels.
+            route = getattr(request.scope.get("route"), "path", "unmatched")
+            HTTP_REQUESTS.labels(request.method, route, str(response.status_code)).inc()
+            HTTP_SECONDS.labels(route).observe(elapsed)
             log.info(
                 "api.request",
                 request_id=rid,
                 method=request.method,
-                path=request.url.path,
+                path=route,
                 status=response.status_code,
-                ms=round((time.perf_counter() - t0) * 1000, 1),
+                ms=round(elapsed * 1000, 1),
             )
         return response
 
@@ -232,6 +241,13 @@ def create_app(services: ApiServices) -> FastAPI:
     @app.get("/healthz", include_in_schema=False)
     def healthz() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/metrics", include_in_schema=False)
+    def metrics(authorization: Annotated[str | None, Header()] = None) -> Response:
+        # Prometheus scrape endpoint. With a token configured, scrapers must send it as a bearer token.
+        if services.metrics_token and authorization != f"Bearer {services.metrics_token}":
+            raise HTTPException(401, "metrics token required", headers={"WWW-Authenticate": "Bearer"})
+        return Response(generate_latest(REGISTRY), media_type=CONTENT_TYPE_LATEST)
 
     @app.get("/readyz", include_in_schema=False)
     def readyz() -> JSONResponse:

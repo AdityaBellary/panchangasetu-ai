@@ -18,7 +18,14 @@ from datetime import datetime
 from itertools import zip_longest
 
 from panchangasetu.core.interfaces import LLM, LLMError
-from panchangasetu.generation.prompts import ABSTAIN_EN, ABSTAIN_TE, build_messages, retry_feedback
+from panchangasetu.generation.prompts import (
+    ABSTAIN_EN,
+    ABSTAIN_TE,
+    BUDGET_EN,
+    BUDGET_TE,
+    build_messages,
+    retry_feedback,
+)
 from panchangasetu.generation.templates import (
     can_template,
     can_template_occurrences,
@@ -130,7 +137,14 @@ class AnswerService:
         self.escalation = escalation
         self.escalation_max_tokens = escalation_max_tokens
 
-    def ask(self, question: str, *, now: datetime | None = None, language: Language | None = None) -> Answer:
+    def ask(
+        self,
+        question: str,
+        *,
+        now: datetime | None = None,
+        language: Language | None = None,
+        allow_llm: bool = True,
+    ) -> Answer:
         t0 = time.perf_counter()
         now = now or self.retriever.clock()
         r = self.retriever.retrieve(question, now=now, language=language)
@@ -190,7 +204,7 @@ class AnswerService:
                 citations=[_citation(e) for e in occ],
             )
 
-        if self.llm is None:
+        if self.llm is None or not allow_llm:
             return self._done(
                 base,
                 timings,
@@ -198,10 +212,12 @@ class AnswerService:
                 None,
                 0,
                 0,
-                answer=_abstain_text(lang),
+                answer=_abstain_text(lang)
+                if self.llm is None
+                else (BUDGET_TE if lang == "te" else BUDGET_EN),
                 abstained=True,
                 method="abstain",
-                reason="no LLM configured",
+                reason="no LLM configured" if self.llm is None else "daily LLM budget reached",
                 citations=[_citation(e) for e in evidence],
             )
         first = self._llm_answer(question, r, evidence, now, base, timings, t0, self.llm, 700)

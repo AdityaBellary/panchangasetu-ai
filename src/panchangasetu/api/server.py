@@ -76,6 +76,7 @@ def build_services(settings: Settings) -> ApiServices:
         today=today,
         rate_limit_per_minute=settings.api_rate_limit_per_minute,
         max_question_chars=settings.api_max_question_chars,
+        metrics_token=settings.api_metrics_token.get_secret_value() if settings.api_metrics_token else None,
     )
 
 
