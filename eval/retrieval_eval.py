@@ -18,6 +18,9 @@ from pathlib import Path
 
 from panchangasetu.cli import build_vector_index
 from panchangasetu.config import get_settings
+from panchangasetu.query.language import detect_language
+from panchangasetu.query.rewrite import Glossary, expand_query
+from panchangasetu.query.slots import extract_slots
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -26,9 +29,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--k", type=int, default=5)
     ap.add_argument("--out", type=Path, default=ROOT / "eval/reports/retrieval_eval.json")
+    ap.add_argument("--expand", action="store_true", help="apply Phase 4 query expansion (glossary)")
     args = ap.parse_args()
     settings = get_settings()
     index = build_vector_index(settings)
+    glossary = Glossary.load(settings.query_glossary_path)
     queries = [
         json.loads(line)
         for line in (ROOT / "eval/datasets/retrieval_v1.jsonl").read_text().splitlines()
@@ -43,9 +48,12 @@ def main() -> None:
         collections = [q["collection"]] if q["gold_pages"] else ["general", "panchanga"]
         for collection in collections:
             t0 = time.perf_counter()
+            text = q["query"]
+            if args.expand:
+                text = expand_query(text, detect_language(text), extract_slots(text), glossary)
             hits = index.search(
                 collection,
-                q["query"],
+                text,
                 top_k=10,
                 candidates=settings.retrieval_candidates,
                 hybrid_min_telugu_ratio=settings.hybrid_min_telugu_ratio,
@@ -77,6 +85,7 @@ def main() -> None:
     latencies.sort()
     report = {
         "embedding_model": settings.embedding_model,
+        "query_expansion": args.expand,
         "chunker_version": settings.chunker_version,
         **{k: round(statistics.mean(v), 3) for k, v in sorted(metrics.items())},
         "latency_ms_p50": round(latencies[len(latencies) // 2], 1),

@@ -56,7 +56,10 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
-ignore = ["RUF001", "RUF002", "RUF003"]  # Telugu text in strings/comments is intentional
+ignore = [
+    "RUF001", "RUF002", "RUF003",  # Telugu text in strings/comments is intentional
+    "SIM905",  # """word list""".split() is more readable than long list literals
+]
 
 [tool.mypy]
 python_version = "3.12"

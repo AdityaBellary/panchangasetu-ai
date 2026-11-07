@@ -156,3 +156,15 @@ def test_running_header_spelling_variant_is_stripped() -> None:
     pages.append(page(8, f"## 8 శ్రీ పరాభవనామ సంవత్సర సిద్ధాంత పంచాంగం\n\n{unique(8)}"))  # variant
     chunks = chunker(target=2000, maximum=3000).chunk(pages)
     assert chunks and all("పంచాంగం" not in c.text and c.heading_path == [] for c in chunks)
+
+
+def test_header_block_keeps_its_title_line() -> None:
+    text = "## కన్యారాశి ఫలితములు\n## (ఉత్తర : 2,3,4 పాదములు)\n## ఆదాయం - 08 వ్యయం - 11\n\n" + unique(3)
+    chunks = chunker(target=500, maximum=600).chunk([page(31, text)])
+    assert chunks[0].heading_path == ["కన్యారాశి ఫలితములు", "(ఉత్తర : 2,3,4 పాదములు)", "ఆదాయం - 08 వ్యయం - 11"]
+
+
+def test_header_block_with_section_and_sub_title_keeps_both() -> None:
+    text = "## శ్రీ పరాభవనామ సంవత్సర రాశి ఫలితములు\n## మేషరాశి ఫలితములు\n## ఆదాయం - 05 వ్యయం - 05\n\n" + unique(1)
+    chunks = chunker(target=500, maximum=600).chunk([page(23, text)])
+    assert "మేషరాశి ఫలితములు" in chunks[0].heading_path

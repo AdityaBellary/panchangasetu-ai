@@ -14,6 +14,7 @@ from panchangasetu.ingestion.pipeline import IngestionPipeline
 from panchangasetu.observability.logging import configure_logging
 from panchangasetu.providers.ocr.factory import build_ocr_engine
 from panchangasetu.providers.ocr.tesseract import TesseractOCREngine
+from panchangasetu.retrieval.orchestrator import Retriever
 from panchangasetu.retrieval.vector_store import VectorIndex, describe
 from panchangasetu.storage.db import make_engine, make_session_factory
 from panchangasetu.storage.models import ChunkRecord, Document, DocumentVersion, Page
@@ -136,6 +137,55 @@ def cmd_search(settings: Settings, args: argparse.Namespace) -> int:
         tag = f"[{p.get('kind')}/{p.get('section_type')}]"
         print(f"{h.score:.3f}  {tag} {where}")
         print(f"       {str(p.get('text'))[:160]!r}")
+    return 0
+
+
+def build_retriever(settings: Settings) -> Retriever:
+    from panchangasetu.query.dates import system_clock
+    from panchangasetu.query.rewrite import Glossary
+    from panchangasetu.query.router import EmbeddingRouter, QueryRouter
+    from panchangasetu.retrieval.structured import StructuredRetriever
+
+    vectors = build_vector_index(settings)
+    semantic = EmbeddingRouter.from_yaml(vectors.embedder, settings.router_examples_path)
+    return Retriever(
+        QueryRouter(semantic, min_confidence=settings.router_min_confidence),
+        vectors,
+        StructuredRetriever(make_session_factory(make_engine(settings.database_url))),
+        system_clock(settings.timezone),
+        Glossary.load(settings.query_glossary_path),
+        top_k=settings.retrieval_top_k,
+        candidates=settings.retrieval_candidates,
+        hybrid_min_telugu_ratio=settings.hybrid_min_telugu_ratio,
+    )
+
+
+def cmd_retrieve(settings: Settings, args: argparse.Namespace) -> int:
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    retriever = build_retriever(settings)
+    now = datetime.fromisoformat(args.now).replace(tzinfo=ZoneInfo(settings.timezone)) if args.now else None
+    for question in args.questions:
+        r = retriever.retrieve(question, now=now)
+        print(f"\n=== {question}")
+        print(
+            f"route: {r.route.intent.value}/{r.route.mode.value} lang={r.route.language.code} "
+            f"conf={r.route.confidence:.2f} {r.route.reasons}"
+        )
+        print(
+            f"dates: {[(d.start.isoformat(), d.end.isoformat()) for d in r.route.dates]}  "
+            f"query: {r.search_query!r}  timings: { {k: round(v) for k, v in r.timings_ms.items()} }"
+        )
+        for note in r.notes:
+            print(f"note: {note}")
+        for e in r.evidence[: args.k]:
+            flag = {True: "verified", False: "UNVERIFIED", None: "prose"}[e.verified]
+            print(
+                f"- [{e.kind}/{e.source_kind}] {e.citation()} {flag}"
+                + (f" score={e.score:.3f}" if e.score is not None else "")
+            )
+            print("    " + e.text[:300].replace("\n", "\n    "))
     return 0
 
 
@@ -266,6 +316,10 @@ def main(argv: list[str] | None = None) -> int:
     se.add_argument("collection", choices=["general", "panchanga"])
     se.add_argument("query")
     se.add_argument("-k", type=int, default=5)
+    rt = sub.add_parser("retrieve", help="debug: route a question and show the evidence it gets")
+    rt.add_argument("questions", nargs="+")
+    rt.add_argument("-k", type=int, default=4, help="evidence items to show")
+    rt.add_argument("--now", help="pretend the current local time is this ISO datetime")
     sub.add_parser("status", help="show ingestion status per document")
     sp = sub.add_parser("show-page", help="print the extracted text of one page")
     sp.add_argument("document")
@@ -280,6 +334,7 @@ def main(argv: list[str] | None = None) -> int:
         "extract-structured": cmd_extract_structured,
         "index": cmd_index,
         "search": cmd_search,
+        "retrieve": cmd_retrieve,
         "status": cmd_status,
         "show-page": cmd_show_page,
     }

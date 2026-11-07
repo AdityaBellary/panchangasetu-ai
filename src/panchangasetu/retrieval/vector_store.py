@@ -48,8 +48,12 @@ def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:40]
 
 
+# Bump when the payload layout or payload indexes change (the fingerprint must then differ).
+PAYLOAD_SCHEMA_VERSION = "2"
+
+
 def fingerprint(docs: Sequence[IndexDocument], embed_name: str, sparse_name: str) -> str:
-    h = hashlib.sha256(f"{embed_name}|{sparse_name}".encode())
+    h = hashlib.sha256(f"{embed_name}|{sparse_name}|payload-v{PAYLOAD_SCHEMA_VERSION}".encode())
     for d in sorted(docs, key=lambda d: d.id):
         h.update(d.id.encode())
         h.update(hashlib.sha256(d.text.encode()).digest())
@@ -145,6 +149,7 @@ class VectorIndex:
                 ("document", models.PayloadSchemaType.KEYWORD),
                 ("date", models.PayloadSchemaType.KEYWORD),
                 ("pages", models.PayloadSchemaType.INTEGER),
+                ("date_int", models.PayloadSchemaType.INTEGER),  # yyyymmdd, for date-range filters
             ):
                 self.client.create_payload_index(physical, name, field_schema=schema)
             for i in range(0, len(docs), _UPSERT_BATCH):

@@ -86,6 +86,10 @@ class Settings(BaseSettings):
     # bake-off showed it degrades English queries (docs/phase-3-retrieval.md).
     hybrid_min_telugu_ratio: float = Field(0.5, ge=0, le=1)
     keep_previous_index_builds: int = Field(1, ge=0)
+    timezone: str = "Asia/Kolkata"  # "today" is evaluated here, not in the server's timezone
+    router_examples_path: Path = Path("config/router_examples.yaml")
+    router_min_confidence: float = Field(0.65, ge=0, le=1)
+    query_glossary_path: Path = Path("config/query_glossary.yaml")
 
     # --- chunking ------------------------------------------------------------------------
     chunk_min_tokens: int = Field(30, ge=0)
@@ -98,7 +102,7 @@ class Settings(BaseSettings):
     # Bump these when the corresponding logic changes; the pipeline uses them to decide
     # what to recompute (OCR is the expensive step and is only redone on extraction bumps).
     extraction_version: str = "ext-1"
-    chunker_version: str = "chunk-3"
+    chunker_version: str = "chunk-5"
 
 
 @lru_cache(maxsize=1)

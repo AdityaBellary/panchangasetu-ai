@@ -1,0 +1,79 @@
+{
+  "embedding_model": "intfloat/multilingual-e5-large",
+  "query_expansion": true,
+  "chunker_version": "chunk-5",
+  "all:mrr@10": 0.765,
+  "all:recall@5": 0.953,
+  "en:mrr@10": 0.702,
+  "en:recall@5": 0.938,
+  "general:mrr@10": 0.75,
+  "general:recall@5": 0.94,
+  "panchanga:mrr@10": 0.821,
+  "panchanga:recall@5": 1.0,
+  "te:mrr@10": 0.829,
+  "te:recall@5": 0.969,
+  "latency_ms_p50": 22.5,
+  "latency_ms_p95": 28.8,
+  "negative_top1_scores": [
+    0.741,
+    0.73,
+    0.738,
+    0.756,
+    0.769,
+    0.766,
+    1.0,
+    0.5,
+    0.553,
+    0.5,
+    0.783,
+    0.8
+  ],
+  "misses": [
+    {
+      "id": "g03",
+      "lang": "te",
+      "query": "మకర రాశి నెలవారీ ఫలితములు",
+      "gold": [
+        37,
+        38
+      ],
+      "top_pages": [
+        28,
+        23,
+        25,
+        26,
+        26
+      ]
+    },
+    {
+      "id": "g11",
+      "lang": "en",
+      "query": "In what order should tarpanam be offered to ancestors?",
+      "gold": [
+        86
+      ],
+      "top_pages": [
+        85,
+        71,
+        52,
+        73,
+        95
+      ]
+    },
+    {
+      "id": "g23",
+      "lang": "en",
+      "query": "What are Shukla paksha and Krishna paksha?",
+      "gold": [
+        55
+      ],
+      "top_pages": [
+        92,
+        60,
+        60,
+        61,
+        83
+      ]
+    }
+  ]
+}

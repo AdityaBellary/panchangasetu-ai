@@ -4,8 +4,8 @@ Telugu document intelligence and grounded RAG platform. It answers Telugu and En
 about TTD panchangam and calendar PDFs, with citations, and abstains when the documents
 don't support an answer.
 
-Status: Phase 3 (vector search) complete. See `docs/phase-1-architecture.md` through
-`docs/phase-3-retrieval.md`.
+Status: Phase 4 (query routing & retrieval) complete. See `docs/phase-1-architecture.md` through
+`docs/phase-4-routing.md`.
 
 ## Quick start (local)
 
@@ -34,6 +34,7 @@ uv run psetu show-page TTD_panchangam.pdf 31
 uv run psetu extract-structured   # panchanga_days / panchanga_events (also run by ingest)
 uv run psetu index                # build/refresh the Qdrant index (local e5 embeddings)
 uv run psetu search general "కుజదోషం అంటే ఏమిటి?"
+uv run psetu retrieve "ఈరోజు నక్షత్రం ఏమిటి?" "When is the next Ekadashi?"   # route + evidence
 ```
 
 ## Tests

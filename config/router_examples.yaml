@@ -1,0 +1,67 @@
+# Example questions for the semantic router (nearest-neighbour vote with local embeddings).
+# Used only when the rule stage cannot decide. Keep these DIFFERENT from eval/datasets/* so
+# routing accuracy is measured honestly. Add examples here to fix misroutes; no code change.
+
+panchanga:
+  - Which day is Ugadi this year?
+  - Dates of Tirumala Brahmotsavam vahanams
+  - Good dates for gruhapravesam next year
+  - Is there any muhurtham for engagement in February?
+  - When does the adhika masam start?
+  - On which date does Sankranti fall?
+  - Garuda seva date at Tirumala
+  - When is the solar eclipse?
+  - When does Mercury become retrograde?
+  - Kartika masam start date
+  - Upcoming new moon day
+  - Pournami dates in 2027
+  - Which day is Sri Rama Navami?
+  - Masa shivaratri dates
+  - Tirupati Govindaraja swamy float festival dates
+  - ఉగాది ఏ రోజు వచ్చింది?
+  - దీపావళి పండుగ ఎప్పుడు?
+  - తిరుమల బ్రహ్మోత్సవాలు ఏ తేదీల్లో జరుగుతాయి?
+  - గృహప్రవేశానికి మంచి రోజులు ఏవి?
+  - వివాహ ముహూర్తాలు ఫిబ్రవరిలో ఉన్నాయా?
+  - అధిక మాసం ఎప్పటి నుండి?
+  - సంక్రాంతి ఏ తేదీ?
+  - గరుడ సేవ ఎప్పుడు?
+  - సూర్య గ్రహణం ఎప్పుడు?
+  - కార్తీక మాసం ఎప్పుడు మొదలవుతుంది?
+  - పౌర్ణమి తేదీలు చెప్పండి
+  - రథోత్సవం ఏ రోజు?
+  - deepavali eppudu?
+  - ugadi ye roju?
+  - pournami eppudu vastundi?
+
+general:
+  - Why do people fast on Ekadashi?
+  - What is the importance of Sankranti?
+  - How will this year be for Simha rasi people?
+  - Career predictions for Dhanus rasi
+  - Which direction should the main door of a house face?
+  - What happens if an owl enters the house?
+  - Rules for performing upanayanam
+  - Explain the meaning of nakshatra padas
+  - What are the twenty-seven yogas?
+  - Which stotram should be chanted for Lakshmi?
+  - What is the year's prediction for rainfall?
+  - Which gemstone is for Saturn?
+  - Remedies for Shani dosha
+  - What is ashtakoota matching?
+  - Who is the author of this panchangam?
+  - ఏకాదశి ఉపవాసం ఎందుకు చేస్తారు?
+  - సింహరాశి వారికి ఈ సంవత్సరం ఎలా ఉంటుంది?
+  - ఇంటి ముఖద్వారం ఏ దిక్కున ఉండాలి?
+  - గుడ్లగూబ ఇంట్లోకి వస్తే ఏమవుతుంది?
+  - ఉపనయనం నియమాలు ఏమిటి?
+  - నక్షత్ర పాదాలు అంటే ఏమిటి?
+  - లక్ష్మీదేవి స్తోత్రం చెప్పండి
+  - ఈ సంవత్సరం వర్షాలు ఎలా ఉంటాయి?
+  - శని దోష నివారణ ఏమిటి?
+  - అష్టకూట పొంతన అంటే ఏమిటి?
+  - పంచాంగ కర్త ఎవరు?
+  - ఈ సంవత్సరం రాజు ఎవరు?
+  - simha rasi phalalu ela unnayi?
+  - shani dosham ante enti?
+  - vastu prakaram vantillu ekkada undali?

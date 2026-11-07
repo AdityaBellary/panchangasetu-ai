@@ -1,0 +1,59 @@
+{"q": "What is today's nakshatram?", "intent": "panchanga", "mode": "day"}
+{"q": "ఈరోజు నక్షత్రం ఏమిటి?", "intent": "panchanga", "mode": "day"}
+{"q": "ee roju tithi enti?", "intent": "panchanga", "mode": "day"}
+{"q": "Tomorrow's tithi and nakshatram", "intent": "panchanga", "mode": "day"}
+{"q": "రేపు తిథి ఏమిటి?", "intent": "panchanga", "mode": "day"}
+{"q": "What is the varjyam on 15 December 2026?", "intent": "panchanga", "mode": "day"}
+{"q": "డిసెంబర్ 20 న దుర్ముహూర్తం ఎప్పుడు?", "intent": "panchanga", "mode": "day"}
+{"q": "Rahu kalam next Friday", "intent": "panchanga", "mode": "day"}
+{"q": "శుక్రవారం రాహుకాలం ఎప్పుడు?", "intent": "panchanga", "mode": "day"}
+{"q": "Panchangam for 2027-01-14", "intent": "panchanga", "mode": "day"}
+{"q": "Sunrise time tomorrow", "intent": "panchanga", "mode": "day"}
+{"q": "నిన్న ఏ పక్షం?", "intent": "panchanga", "mode": "day"}
+{"q": "Which masam is it today?", "intent": "panchanga", "mode": "day"}
+{"q": "repu amrutha kalam eppudu?", "intent": "panchanga", "mode": "day"}
+{"q": "When is the next Ekadashi?", "intent": "panchanga", "mode": "find"}
+{"q": "వచ్చే ఏకాదశి ఎప్పుడు?", "intent": "panchanga", "mode": "find"}
+{"q": "Next Purnima date", "intent": "panchanga", "mode": "find"}
+{"q": "తదుపరి అమావాస్య ఎప్పుడు?", "intent": "panchanga", "mode": "find"}
+{"q": "When is the next Rohini nakshatram?", "intent": "panchanga", "mode": "find"}
+{"q": "vachche pournami eppudu?", "intent": "panchanga", "mode": "find"}
+{"q": "When is Deepavali?", "intent": "panchanga", "mode": "search"}
+{"q": "దీపావళి పండుగ ఏ తేదీ?", "intent": "panchanga", "mode": "search"}
+{"q": "Festivals this week", "intent": "panchanga", "mode": "search"}
+{"q": "వచ్చే నెల పండుగలు ఏమిటి?", "intent": "panchanga", "mode": "search"}
+{"q": "Marriage muhurthams in April 2027", "intent": "panchanga", "mode": "search"}
+{"q": "When is the Tirumala Brahmotsavam in 2026?", "intent": "panchanga", "mode": "search"}
+{"q": "తిరుమల రథసప్తమి ఎప్పుడు?", "intent": "panchanga", "mode": "search"}
+{"q": "When does Rohini karthe begin?", "intent": "panchanga", "mode": "search"}
+{"q": "Vaikuntha Ekadasi date", "intent": "panchanga", "mode": "search"}
+{"q": "When does the Sun enter Makara rasi?", "intent": "panchanga", "mode": "search"}
+{"q": "Good muhurtham for griha pravesham in May", "intent": "panchanga", "mode": "search"}
+{"q": "గోవిందరాజస్వామి తెప్పోత్సవం తేదీలు", "intent": "panchanga", "mode": "search"}
+{"q": "krishnashtami eppudu?", "intent": "panchanga", "mode": "search"}
+{"q": "Sri Rama Navami 2026 date", "intent": "panchanga", "mode": "search"}
+{"q": "What is the significance of Ekadashi?", "intent": "general", "mode": "none"}
+{"q": "ఏకాదశి విశిష్టత ఏమిటి?", "intent": "general", "mode": "none"}
+{"q": "Kanya rasi predictions for this year", "intent": "general", "mode": "none"}
+{"q": "మేషరాశి వారికి ఈ ఏడాది ఫలితాలు", "intent": "general", "mode": "none"}
+{"q": "What is Kuja dosha?", "intent": "general", "mode": "none"}
+{"q": "కుజదోషం ఉంటే వివాహం చేయవచ్చా?", "intent": "general", "mode": "none"}
+{"q": "What does it mean if a lizard falls on the head?", "intent": "general", "mode": "none"}
+{"q": "బల్లి పడితే ఏమవుతుంది?", "intent": "general", "mode": "none"}
+{"q": "How is Rahu kalam calculated?", "intent": "general", "mode": "none"}
+{"q": "Explain the hora chakram", "intent": "general", "mode": "none"}
+{"q": "Who is the king of the Parabhava year?", "intent": "general", "mode": "none"}
+{"q": "పరాభవ సంవత్సర ఫలితాలు ఏమిటి?", "intent": "general", "mode": "none"}
+{"q": "Venkateswara morning prayer slokas", "intent": "general", "mode": "none"}
+{"q": "తర్పణం ఎలా ఇవ్వాలి?", "intent": "general", "mode": "none"}
+{"q": "What are Shukla and Krishna paksha?", "intent": "general", "mode": "none"}
+{"q": "Things not to do after marriage", "intent": "general", "mode": "none"}
+{"q": "Effects of being born in Moola nakshatra", "intent": "general", "mode": "none"}
+{"q": "గృహప్రవేశానికి ఏ మాసాలు మంచివి?", "intent": "general", "mode": "none"}
+{"q": "kanya rasi phalalu ela unnayi?", "intent": "general", "mode": "none"}
+{"q": "kuja dosham ante enti?", "intent": "general", "mode": "none"}
+{"q": "Results of bad dreams", "intent": "general", "mode": "none"}
+{"q": "Commodity price predictions this year", "intent": "general", "mode": "none"}
+{"q": "What is Ekadashi and when is the next one?", "intent": "hybrid", "mode": "find"}
+{"q": "ఏకాదశి ప్రాముఖ్యత ఏమిటి, వచ్చే ఏకాదశి ఎప్పుడు?", "intent": "hybrid", "mode": "find"}
+{"q": "Why is tomorrow's tithi important?", "intent": "hybrid", "mode": "day"}

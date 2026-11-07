@@ -253,7 +253,10 @@ class TeluguChunker:
                     titled = [ln for ln in lines if _has_letters(ln)]
                     if titled:  # "## 156" (a page number tagged as header) is not a heading
                         flush(carry_overlap=False)
-                        headings = titled[-2:]
+                        # A header block opens with its title(s) - sometimes a section title and a
+                        # sub-title ("…రాశి ఫలితములు" then "మేషరాశి ఫలితములు") - and ends with details
+                        # (nakshatra padas, aaya/vyaya). Keep the first two lines and the last.
+                        headings = list(dict.fromkeys(titled[:2] + titled[-1:]))
                         heading_page = page.page_number
                     continue
                 if current is not None and (
