@@ -7,6 +7,7 @@ chunks             per-version chunks, tagged with chunker_version
 ingestion_runs     audit trail + stats for each pipeline execution
 chat_sessions      conversations (Phase 6)
 chat_turns         questions, their standalone rewrites and answers
+api_keys           API clients (hashed keys, Phase 7)
 """
 
 from __future__ import annotations
@@ -295,3 +296,18 @@ class ChatTurn(Base):
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
     asked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ApiKey(Base):
+    """An API client. Only a SHA-256 of the key is stored; the key itself is shown once at creation."""
+
+    __tablename__ = "api_keys"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(128))
+    prefix: Mapped[str] = mapped_column(String(16), index=True)  # first characters, to identify a key
+    key_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    rate_limit_per_minute: Mapped[int | None] = mapped_column(Integer)  # None: the server default
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

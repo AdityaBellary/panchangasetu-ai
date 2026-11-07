@@ -39,6 +39,15 @@ class SessionNotFound(KeyError):
     pass
 
 
+@dataclass(slots=True)
+class SessionSummary:
+    id: str
+    title: str  # the first question
+    turns: int
+    created_at: datetime
+    updated_at: datetime
+
+
 class SessionStore(Protocol):
     def create(self, owner: str | None = None) -> str: ...
 
@@ -49,6 +58,12 @@ class SessionStore(Protocol):
         ...
 
     def add_turn(self, session_id: str, turn: TurnRecord) -> None: ...
+
+    def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
+        """Most recently active first; empty sessions are left out."""
+        ...
+
+    def delete(self, session_id: str, owner: str | None = None) -> bool: ...
 
 
 class InMemorySessionStore:
@@ -74,6 +89,20 @@ class InMemorySessionStore:
         if session_id not in self._turns:
             raise SessionNotFound(session_id)
         self._turns[session_id].append(turn)
+
+    def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
+        out = [
+            SessionSummary(sid, turns[0].question, len(turns), turns[0].asked_at, turns[-1].asked_at)
+            for sid, turns in self._turns.items()
+            if turns and self._owners[sid] == owner
+        ]
+        return sorted(out, key=lambda s: s.updated_at, reverse=True)[:limit]
+
+    def delete(self, session_id: str, owner: str | None = None) -> bool:
+        if not self.exists(session_id, owner):
+            return False
+        del self._turns[session_id], self._owners[session_id]
+        return True
 
 
 def _uuid(session_id: str) -> uuid.UUID:
@@ -142,6 +171,35 @@ class SqlSessionStore:
                 )
             )
             chat.updated_at = utcnow()
+
+    def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
+        with session_scope(self.factory) as s:
+            first = (
+                select(ChatTurn.question)
+                .where(ChatTurn.session_id == ChatSession.id)
+                .order_by(ChatTurn.seq)
+                .limit(1)
+                .scalar_subquery()
+            )
+            count = (
+                select(func.count(ChatTurn.id)).where(ChatTurn.session_id == ChatSession.id).scalar_subquery()
+            )
+            owner_filter = ChatSession.owner.is_(None) if owner is None else ChatSession.owner == owner
+            rows = s.execute(
+                select(ChatSession, first, count)
+                .where(owner_filter, count > 0)
+                .order_by(ChatSession.updated_at.desc())
+                .limit(limit)
+            ).all()
+            return [SessionSummary(str(c.id), str(q), int(n), c.created_at, c.updated_at) for c, q, n in rows]
+
+    def delete(self, session_id: str, owner: str | None = None) -> bool:
+        if not self.exists(session_id, owner):
+            return False
+        with session_scope(self.factory) as s:
+            s.query(ChatTurn).filter(ChatTurn.session_id == _uuid(session_id)).delete()
+            s.query(ChatSession).filter(ChatSession.id == _uuid(session_id)).delete()
+        return True
 
 
 def _record(r: ChatTurn) -> TurnRecord:

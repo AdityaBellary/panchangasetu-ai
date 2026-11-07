@@ -229,7 +229,10 @@ def resolve_by_rules(question: str, history: Sequence[TurnRecord], today: date) 
     if cur.day_pronouns and not cur.dates:
         day = _previous_day(prev, record, lang)
         if day:
-            edits += [(span, day) for span in cur.day_pronouns]
+            for a, b in cur.day_pronouns:
+                # English needs a preposition: "nakshatram that day" -> "nakshatram on 20 November 2026".
+                needs_on = lang == "en" and not re.search(r"\b(?:on|of|for)\s*$", question[:a], re.I)
+                edits.append(((a, b), f"on {day}" if needs_on else day))
             reasons.append(f"that day -> {day}")
     if edits:
         return Resolution(_replace(question, edits), "rule", "; ".join(reasons))

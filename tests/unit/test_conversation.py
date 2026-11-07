@@ -68,7 +68,7 @@ def test_rules_rewrite_follow_ups_from_the_previous_frame(prev: str, follow_up: 
 
 def test_that_day_becomes_the_date_the_previous_answer_cited() -> None:
     out = resolve("When is the next Ekadashi?", "what is the nakshatram that day?", cited=["2026-11-20"])
-    assert out == "what is the nakshatram 20 November 2026?"
+    assert out == "what is the nakshatram on 20 November 2026?"
     te = resolve("వచ్చే ఏకాదశి ఎప్పుడు?", "ఆ రోజు నక్షత్రం ఏమిటి?", cited=["2026-11-20"])
     assert te == "20 నవంబర్ 2026 నక్షత్రం ఏమిటి?"
 
@@ -151,6 +151,12 @@ def test_store_keeps_turns_in_order_per_session(make: type) -> None:
     assert not store.exists("not-a-uuid")
     with pytest.raises(SessionNotFound):
         store.recent_turns("00000000-0000-0000-0000-000000000000", 3)
+    store.create("client-a")  # empty sessions are not listed
+    listed = store.list_sessions("client-a")
+    assert [(s.id, s.title, s.turns) for s in listed] == [(a, "q0", 4)]
+    assert [s.id for s in store.list_sessions(None)] == [b]
+    assert not store.delete(a, "client-b") and store.delete(a, "client-a")
+    assert not store.exists(a) and store.list_sessions("client-a") == []
 
 
 # ------------------------------------------------------------------ service

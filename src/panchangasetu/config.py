@@ -109,6 +109,12 @@ class Settings(BaseSettings):
     # (~₹0.01 each). False: such questions are answered as typed.
     followup_llm_rewrite: bool = True
 
+    # --- HTTP API ---
+    api_host: str = "127.0.0.1"
+    api_port: int = Field(8000, ge=1, le=65535)
+    api_rate_limit_per_minute: int = Field(30, ge=1)  # per API key; a key can carry its own limit
+    api_max_question_chars: int = Field(500, ge=10)
+
     # --- chunking ------------------------------------------------------------------------
     chunk_min_tokens: int = Field(30, ge=0)
     chunk_target_tokens: int = Field(350, ge=50)

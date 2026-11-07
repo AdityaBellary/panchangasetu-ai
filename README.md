@@ -4,8 +4,15 @@ Telugu document intelligence and grounded RAG platform. It answers Telugu and En
 about TTD panchangam and calendar PDFs, with citations, and abstains when the documents
 don't support an answer.
 
-Status: Phase 6 (conversations and sessions) complete. See `docs/phase-1-architecture.md` through
-`docs/phase-6-conversations.md`.
+Status: Phase 7 (HTTP API, API keys and web chat) complete. See `docs/phase-1-architecture.md` through
+`docs/phase-7-api.md`.
+
+## Web chat
+
+```bash
+uv run psetu api-keys create web   # copy the key it prints (shown once)
+uv run psetu serve                 # open http://127.0.0.1:8000/ and paste the key
+```
 
 ## Quick start (local)
 

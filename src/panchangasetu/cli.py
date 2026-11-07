@@ -279,6 +279,40 @@ def cmd_chat(settings: Settings, args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_serve(settings: Settings, args: argparse.Namespace) -> int:
+    import uvicorn
+
+    from panchangasetu.api.app import create_app
+    from panchangasetu.api.server import build_services
+
+    host, port = args.host or settings.api_host, args.port or settings.api_port
+    app = create_app(build_services(settings))  # loads the embedder before accepting requests
+    print(f"PanchangaSetu: web chat at http://{host}:{port}/  (API docs at /docs)")
+    uvicorn.run(app, host=host, port=port, log_level="warning")
+    return 0
+
+
+def cmd_api_keys(settings: Settings, args: argparse.Namespace) -> int:
+    from panchangasetu.api.keys import ApiKeyStore
+
+    store = ApiKeyStore(make_session_factory(make_engine(settings.database_url)))
+    if args.keys_cmd == "create":
+        key, info = store.create(args.name, rate_limit_per_minute=args.rate_limit)
+        print(f"Created key '{info.name}' (id {info.id}, prefix {info.prefix}).")
+        print("Copy it now; it is not stored and cannot be shown again:\n")
+        print(f"  {key}\n")
+    elif args.keys_cmd == "list":
+        for k in store.list():
+            state = f"revoked {k.revoked_at:%Y-%m-%d}" if k.revoked_at else "active"
+            used = f"last used {k.last_used_at:%Y-%m-%d %H:%M}" if k.last_used_at else "never used"
+            print(f"{k.prefix}…  {k.name:20} {state:18} {used}  id={k.id}")
+    else:
+        n = store.revoke(args.key_id)
+        print(f"Revoked {n} key(s).")
+        return 0 if n else 1
+    return 0
+
+
 def cmd_db_upgrade(settings: Settings, _: argparse.Namespace) -> int:
     from alembic import command
     from alembic.config import Config
@@ -423,6 +457,16 @@ def main(argv: list[str] | None = None) -> int:
     ch = sub.add_parser("chat", help="interactive question answering in the terminal")
     ch.add_argument("-v", "--verbose", action="store_true")
     ch.add_argument("--session", help="resume an existing session id")
+    sv = sub.add_parser("serve", help="run the HTTP API and web chat UI")
+    sv.add_argument("--host", help="default PSETU_API_HOST (127.0.0.1)")
+    sv.add_argument("--port", type=int, help="default PSETU_API_PORT (8000)")
+    keys = sub.add_parser("api-keys", help="manage API keys").add_subparsers(dest="keys_cmd", required=True)
+    kc = keys.add_parser("create", help="create a key (shown once)")
+    kc.add_argument("name")
+    kc.add_argument("--rate-limit", type=int, help="requests per minute (default: server setting)")
+    keys.add_parser("list", help="list keys (never shows the keys themselves)")
+    kr = keys.add_parser("revoke", help="revoke a key by id or prefix")
+    kr.add_argument("key_id")
     sub.add_parser("status", help="show ingestion status per document")
     sp = sub.add_parser("show-page", help="print the extracted text of one page")
     sp.add_argument("document")
@@ -442,6 +486,8 @@ def main(argv: list[str] | None = None) -> int:
         "chat": cmd_chat,
         "status": cmd_status,
         "show-page": cmd_show_page,
+        "serve": cmd_serve,
+        "api-keys": cmd_api_keys,
     }
     return handlers[args.cmd](settings, args)
 

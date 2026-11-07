@@ -20,6 +20,8 @@ dependencies = [
     "fastembed>=0.9.1",
     "numpy>=2.0",
     "httpx>=0.27",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
 ]
 
 [project.scripts]
@@ -33,6 +35,7 @@ dev = [
     "mypy>=1.13",
     "types-pyyaml",
     "types-regex",
+    "httpx>=0.27",
 ]
 
 [build-system]
