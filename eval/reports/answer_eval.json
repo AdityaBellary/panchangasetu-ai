@@ -1,18 +1,18 @@
 {
   "summary": {
-    "answer_accuracy": 0.875,
-    "abstention_accuracy": 0.833,
-    "hallucinated_answers_on_negatives": 1,
+    "answer_accuracy": 0.882,
+    "abstention_accuracy": 1.0,
+    "hallucinated_answers_on_negatives": 0,
     "false_abstentions": 1,
-    "language_match": 1.0,
+    "language_match": 0.955,
     "methods": {
       "template": 5,
       "llm": 11,
       "abstain": 6
     },
-    "total_cost_inr": 0.83,
-    "median_latency_ms": 420.5,
-    "p95_latency_ms": 1120
+    "total_cost_inr": 0.927,
+    "median_latency_ms": 395.0,
+    "p95_latency_ms": 1394
   },
   "results": [
     {
@@ -26,7 +26,7 @@
       "reason": "",
       "missing": [],
       "cost_inr": 0.0,
-      "latency_ms": 58,
+      "latency_ms": 78,
       "answer": "Saturday, 07 November 2026\nNakshatram: Chitta until 6:12 AM on 08 Nov; then Swati."
     },
     {
@@ -54,7 +54,7 @@
       "reason": "",
       "missing": [],
       "cost_inr": 0.0,
-      "latency_ms": 52,
+      "latency_ms": 53,
       "answer": "Next Ekadasi: Friday, 20 November 2026 (Kartika Shukla paksha Ekadasi), until 2:04 AM on 21 Nov.\nAfter that Ekadasi: Friday, 04 December 2026 (Kartika Krishna paksha Ekadasi), until 1:36 AM on 05 Dec."
     },
     {
@@ -68,8 +68,8 @@
       "reason": "",
       "missing": [],
       "cost_inr": 0.0,
-      "latency_ms": 43,
-      "answer": "తదుపరి పూర్ణిమ: 24 డిసెంబర్ 2026 (గురువారం) (మార్గశిరం శుద్ధ పూర్ణిమ), ఉదయం 8:07 వరకు.\nఆ తరువాత పూర్ణిమ: 22 జనవరి 2027 (శుక్రవారం) (పుష్యం శుద్ధ పూర్ణిమ), సాయంత్రం 6:53 వరకు."
+      "latency_ms": 48,
+      "answer": "తదుపరి పూర్ణిమ: 24 నవంబర్ 2026 (మంగళవారం), మరుసటి సూర్యోదయం తరువాత వరకు వరకు (గోడ క్యాలెండర్ ప్రకారం; పుస్తకంతో ధృవీకరించబడలేదు).\nఆ తరువాత పూర్ణిమ: 24 డిసెంబర్ 2026 (గురువారం) (మార్గశిరం శుద్ధ పూర్ణిమ), ఉదయం 8:07 వరకు."
     },
     {
       "id": "a05",
@@ -95,9 +95,9 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.06178,
-      "latency_ms": 878,
-      "answer": "2026-11-08 ఆదివారం (Sunday) నాడు దీపావళి పండుగ ఉంది."
+      "cost_inr": 0.02973,
+      "latency_ms": 756,
+      "answer": "TTD panchangam ప్రకారం, 2026-11-08 ఆదివారం నాడు నరకచతుర్దశి, దీపావళి పండుగ ఉన్నాయి."
     },
     {
       "id": "a07",
@@ -109,23 +109,32 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.02498,
-      "latency_ms": 464,
-      "answer": "According to the provided panchangam sources, Vaikuntha Ekadasi falls on 2026-12-20 (Sunday)."
+      "cost_inr": 0.02354,
+      "latency_ms": 392,
+      "answer": "According to the sources, Vaikuntha Ekadasi occurs on 2026-12-20 (Sunday)."
     },
     {
       "id": "a08",
       "q": "What are the yearly predictions for Kanya rasi?",
       "expect": "answer",
-      "correct": true,
+      "correct": false,
       "language_ok": true,
-      "method": "llm",
-      "abstained": false,
-      "reason": "",
-      "missing": [],
-      "cost_inr": 0.11097,
-      "latency_ms": 2420,
-      "answer": "For Kanya rasi, the yearly predictions indicate that Jupiter in the 10th house until 2026 June 1 brings copper-form ordinary results, and from June 2, 2026, in the 11th house brings loss of wealth. Rahu and Ketu in the 6th and 12th houses until 2026 December 5 bring silver-form auspicious results, and from December 6, 2026, in the 5th and 11th houses bring auspicious results. There will be financial gains through a spouse, and significant gains from a mother or elder sibling. There will be growth in social relations, personal growth, and financial gains. There will be an increase in authority and selection for responsible posts, good relations with friends, and physical fitness. There will be differences of opinion with children and siblings, and problems in married life. During the Saturn transit, there will be stability in marital relations, partnerships, and professional life, commitment to personal relationships, auspicious times for partnership businesses, and success through discipline and patience."
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [
+        [
+          "June 1",
+          "1 June"
+        ],
+        [
+          "tenth",
+          "10th"
+        ]
+      ],
+      "cost_inr": 0.04035,
+      "latency_ms": 504,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
     },
     {
       "id": "a09",
@@ -137,9 +146,9 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.03651,
-      "latency_ms": 833,
-      "answer": "మకరరాశి వారికి ఉద్యోగ ఫలితాలు అనుకూలంగా ఉంటాయి. కొత్త ఉద్యోగం పొందవచ్చు. గురుడి ప్రభావం వలన వ్యాపారాలలో విజయం లభిస్తుంది. శని గోచర ప్రభావం వలన అన్ని రంగాల్లో శుభ ఫలితాలు కలుగుతాయి."
+      "cost_inr": 0.04857,
+      "latency_ms": 549,
+      "answer": "మకరరాశి వారికి ఉద్యోగ ఫలితాలు అనుకూలంగా ఉన్నాయి. మే నెలలో ఉద్యోగులు ప్రమోషన్ లేదా వేతన పెంపును పొందుతారు. నవంబర్ నెలలో ఉద్యోగులకు ప్రమోషన్, జీతం పెంపు అవకాశం ఉంది. డిసెంబరు నెలలో పై అధికారుల నుండి గుర్తింపు పొందుతారు."
     },
     {
       "id": "a10",
@@ -151,33 +160,23 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.06078,
-      "latency_ms": 1120,
-      "answer": "Kuja dosha (కుజదోషము) is a defect caused by Mars (కుజుడు) in specific positions in a birth chart. It is not a problem for marriage when Mars is in the 2nd, 4th, 7th, 8th, or 12th house, or when both the bride and groom have it in these positions, allowing them to enjoy long marital happiness. It is also absent if Mars is in Cancer, Leo, Capricorn, or if born in friendly signs, or when Mars is conjoined with Jupiter or the Moon."
+      "cost_inr": 0.11904,
+      "latency_ms": 2147,
+      "answer": "Kuja dosha (కుజదోషము) is a dosha that occurs when Mars (కుజుడు) is positioned in specific houses in a birth chart. It is not a problem for marriage when Mars is in the 2nd, 4th, 7th, 8th, or 12th houses for both the bride and groom, or when Mars is in Cancer, Leo, Capricorn, or when joined with Jupiter or the Moon."
     },
     {
       "id": "a11",
       "q": "Which months are good for griha pravesham?",
       "expect": "answer",
-      "correct": false,
-      "language_ok": true,
-      "method": "abstain",
-      "abstained": true,
-      "reason": "model judged the sources insufficient",
-      "missing": [
-        [
-          "Magha",
-          "మాఘ"
-        ],
-        [
-          "Vaisakha",
-          "Vaishakha",
-          "వైశాఖ"
-        ]
-      ],
-      "cost_inr": 0.05498,
-      "latency_ms": 454,
-      "answer": "I don't have enough information in the available documents to answer this question accurately."
+      "correct": true,
+      "language_ok": false,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.12036,
+      "latency_ms": 1421,
+      "answer": "According to, the good months for griha pravesham (గృహప్రవేశము) are ఉత్తరాయణము - మాఘ, పాల్గుణ, వైశాఖ, జ్యేష్ఠమాసములు. states ఉత్తరాయణము - చైత్ర, వైశాఖ, జ్యేష్ఠ, ఫాల్గుణ మాసములు ఉత్తమము."
     },
     {
       "id": "a12",
@@ -189,9 +188,9 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.05193,
-      "latency_ms": 403,
-      "answer": "According to the source, if a lizard falls on the left eye (ఎడమకన్ను), it indicates humiliation (అవమానము)."
+      "cost_inr": 0.05157,
+      "latency_ms": 459,
+      "answer": "According to the source, if a lizard falls on the left eye, it indicates humiliation (అవమానము)."
     },
     {
       "id": "a13",
@@ -207,9 +206,9 @@
           "పరాజయ"
         ]
       ],
-      "cost_inr": 0.04932,
-      "latency_ms": 486,
-      "answer": "బల్లి కుడి కన్ను మీద పడితే అవమానము కలుగుతుంది. ఎడమ కన్ను మీద పడితే అవమానము కలుగుతుంది."
+      "cost_inr": 0.05286,
+      "latency_ms": 549,
+      "answer": "బల్లి కుడి కన్ను మీద పడితే కుడి కన్నులున అవమానము అని ఫలము అని తెలుస్తోంది. ఇది లో పేర్కొనబడింది."
     },
     {
       "id": "a14",
@@ -222,8 +221,8 @@
       "reason": "",
       "missing": [],
       "cost_inr": 0.04,
-      "latency_ms": 438,
-      "answer": "According to the source, the king (రాజు) of the Sri Parabhava nama samvatsara is Guru (గురుడు)."
+      "latency_ms": 398,
+      "answer": "According to, the king (రాజు) of the Sri Parabhava nama samvatsara is Guru (గురుడు)."
     },
     {
       "id": "a15",
@@ -235,9 +234,9 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.07167,
-      "latency_ms": 1248,
-      "answer": "తర్పణ క్రమం ప్రకారం ముందుగా తల్లిదండ్రులకు, సవతి తల్లి, మాతామహ, పితామహ, ప్రపితామహాదులు, తన భార్య, కుమారులు, పినతండ్రి, పెదతండ్రులు, మేనమామ, కూతురు, బావలు, మరదులు, అత్తమామలు, ఆచార్యుడు, గురువు, ప్రభువు, స్నేహితుడు ఈ క్రమంలోనే తర్పణ ఇవ్వాలి. మాతామహ్యాదులకు పితృపితామహ్యాదులలో కలపకుండా వేరుగా తర్పణం ఇవ్వాలి. భార్యలు మరణించినవారికి 'సభార్యానాం' అని, పిల్లలు మరణించినవారికి 'ససంత తేయనియు', భర్తలు మరణించినవారికి 'సభర్తృణం' అని గోత్రపూర్వకంగా తర్పణం ఇవ్వాలి. సవతి తల్లికి వలెనే సాపత్న్య సోదరులకు కూడా తర్పణం ఇవ్వాలి."
+      "cost_inr": 0.07108,
+      "latency_ms": 1391,
+      "answer": "తర్పణ క్రమం ప్రకారం ముందుగా తల్లిదండ్రులకు, సవతి తల్లి, మాతామహ, పితామహ, ప్రపితామహ, తన భార్య, కుమారులు, పినతండ్రి, పెదతండ్రులు, మేనమామ, కూతురు, బావలు, మరదులు, అత్తమామలు, ఆచార్యుడు, గురువు, ప్రభువు, స్నేహితుడు ఈ క్రమంలోనే తర్పణాలు ఇవ్వాలి. సవతి తల్లికి వలెనే సాపత్న్య సోదరులకు కూడా తర్పణం ఇవ్వాలి. మాతామహ్యాదులకు పితృపితామహ్యాదులలో కలపకుండా వేరుగా తర్పణాలు ఇవ్వాలి. భార్యలు చనిపోయినవారికి సభార్యానాం అనియు, పిల్లలు చనిపోయినవారికి ససంత తేయనియు, భర్తలు చనిపోయినవారికి సభర్తృణం అనియు గోత్రపూర్వకంగా తర్పణం ఇవ్వాలి."
     },
     {
       "id": "a16",
@@ -249,9 +248,9 @@
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.05208,
-      "latency_ms": 444,
-      "answer": "According to, the Rahu kalam on Friday is 10½ to 12 in the morning and 3 to 4½ in the afternoon."
+      "cost_inr": 0.0522,
+      "latency_ms": 447,
+      "answer": "According to, Rahu kalam on Friday is 10½ to 12 (morning) and 3 to 4½ (afternoon)."
     },
     {
       "id": "n01",
@@ -277,8 +276,8 @@
       "abstained": true,
       "reason": "model judged the sources insufficient",
       "missing": [],
-      "cost_inr": 0.05853,
-      "latency_ms": 312,
+      "cost_inr": 0.05244,
+      "latency_ms": 276,
       "answer": "I don't have enough information in the available documents to answer this question accurately."
     },
     {
@@ -291,23 +290,23 @@
       "abstained": true,
       "reason": "model judged the sources insufficient",
       "missing": [],
-      "cost_inr": 0.015,
-      "latency_ms": 265,
+      "cost_inr": 0.01488,
+      "latency_ms": 260,
       "answer": "I don't have enough information in the available documents to answer this question accurately."
     },
     {
-      "id": "n04",
+      "id": "a17",
       "q": "What does it mean if a lizard falls on the head?",
-      "expect": "abstain",
-      "correct": false,
+      "expect": "answer",
+      "correct": true,
       "language_ok": true,
       "method": "llm",
       "abstained": false,
       "reason": "",
       "missing": [],
-      "cost_inr": 0.05815,
-      "latency_ms": 788,
-      "answer": "According to the sources, if a lizard falls on the head, there is fear of death for the husband and bearing of burden. The specific results for the head are: on the head (Brahmarandhra), there is fear of death; on the back of the head, there is misfortune for the younger brother; in front of the Brahmarandhra, there is harm to the maternal uncle; and on the face, there is gain of wealth."
+      "cost_inr": 0.12354,
+      "latency_ms": 1394,
+      "answer": "If a lizard falls on the head, it indicates death for the husband and carrying heavy burdens, according to the TTD panchangam. Specifically, falling on the head above the Brahma-randhram indicates loss for the maternal uncle, and falling on the head above the Brahma-randhram indicates fear of death."
     },
     {
       "id": "n05",
@@ -319,8 +318,8 @@
       "abstained": true,
       "reason": "model judged the sources insufficient",
       "missing": [],
-      "cost_inr": 0.06413,
-      "latency_ms": 332,
+      "cost_inr": 0.06642,
+      "latency_ms": 308,
       "answer": "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు."
     },
     {
@@ -333,8 +332,8 @@
       "abstained": true,
       "reason": "model judged the sources insufficient",
       "missing": [],
-      "cost_inr": 0.01947,
-      "latency_ms": 289,
+      "cost_inr": 0.02007,
+      "latency_ms": 251,
       "answer": "I don't have enough information in the available documents to answer this question accurately."
     }
   ]

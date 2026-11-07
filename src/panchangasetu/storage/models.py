@@ -5,6 +5,8 @@ document_versions  one row per distinct content (sha256) seen for a document
 pages              per-version page extraction results (OCR text is cached here)
 chunks             per-version chunks, tagged with chunker_version
 ingestion_runs     audit trail + stats for each pipeline execution
+chat_sessions      conversations (Phase 6)
+chat_turns         questions, their standalone rewrites and answers
 """
 
 from __future__ import annotations
@@ -254,3 +256,42 @@ class IndexBuild(Base):
     status: Mapped[str] = mapped_column(String(16))  # building | active | retired | failed
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ChatSession(Base):
+    """A conversation. `owner` is the API client (Phase 7); the CLI leaves it empty."""
+
+    __tablename__ = "chat_sessions"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    owner: Mapped[str | None] = mapped_column(String(128), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ChatTurn(Base):
+    """One question and its answer. `standalone_question` is what was actually answered after
+    follow-up resolution; `asked_at` is the clock the question was answered against ("today")."""
+
+    __tablename__ = "chat_turns"
+    __table_args__ = (UniqueConstraint("session_id", "seq", name="uq_chat_turn_seq"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("chat_sessions.id", ondelete="CASCADE"), index=True
+    )
+    seq: Mapped[int] = mapped_column(Integer)
+    question: Mapped[str] = mapped_column(Text)
+    standalone_question: Mapped[str] = mapped_column(Text)
+    rewrite_method: Mapped[str] = mapped_column(String(16))  # none | rule | llm
+    language: Mapped[str] = mapped_column(String(8))
+    answer: Mapped[str] = mapped_column(Text)
+    abstained: Mapped[bool] = mapped_column(Boolean)
+    method: Mapped[str] = mapped_column(String(16))
+    route: Mapped[str] = mapped_column(String(32))
+    citations: Mapped[list[Any]] = mapped_column(default=list)
+    model: Mapped[str | None] = mapped_column(String(128))
+    cost_inr: Mapped[float] = mapped_column(Float, default=0.0)
+    latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
+    asked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

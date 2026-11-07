@@ -32,6 +32,11 @@ _DIGITS_RE = regex.compile(r"\d+")
 # A heading stays in force for its own page and at most this many following pages.
 _HEADING_TTL_PAGES = 2
 _HEADING_PREFIX = "## "
+# Section titles OCR sometimes tags as plain paragraphs ("తులారాశి ఫలితములు" on its own line).
+_TITLE_LINE_RE = regex.compile(r"^[\p{Telugu}\s]{2,24}రాశి\s*ఫలితము(?:లు)?$")
+# Generic sub-titles that repeat inside every section ("monthly results"): they nest under the
+# section title instead of replacing it, or every rasi's monthly results would look alike.
+_SUBTITLE_RE = regex.compile(r"^నెలవారీ\s*ఫలితము(?:లు)?$")
 
 
 def approx_token_counter(chars_per_token: float) -> TokenCounter:
@@ -248,6 +253,10 @@ class TeluguChunker:
                 block = raw_block.strip()
                 if not block:
                     continue
+                lines = block.splitlines()
+                if len(lines) <= 5 and _TITLE_LINE_RE.match(lines[0].strip()):
+                    # An untagged header block: title, then nakshatra padas and aaya/vyaya lines.
+                    block = _HEADING_PREFIX + block
                 if block.startswith(_HEADING_PREFIX):
                     lines = [ln.removeprefix(_HEADING_PREFIX).strip() for ln in block.splitlines()]
                     titled = [ln for ln in lines if _has_letters(ln)]
@@ -256,7 +265,13 @@ class TeluguChunker:
                         # A header block opens with its title(s) - sometimes a section title and a
                         # sub-title ("…రాశి ఫలితములు" then "మేషరాశి ఫలితములు") - and ends with details
                         # (nakshatra padas, aaya/vyaya). Keep the first two lines and the last.
-                        headings = list(dict.fromkeys(titled[:2] + titled[-1:]))
+                        new = list(dict.fromkeys(titled[:2] + titled[-1:]))
+                        if all(_SUBTITLE_RE.match(h) for h in new) and headings:
+                            # Nest under the most specific title ("మేషరాశి…", not the book-wide one).
+                            titles = [h for h in headings if _TITLE_LINE_RE.match(h)]
+                            parent = titles[-1:] or [h for h in headings if not _SUBTITLE_RE.match(h)][:1]
+                            new = parent + new
+                        headings = new
                         heading_page = page.page_number
                     continue
                 if current is not None and (

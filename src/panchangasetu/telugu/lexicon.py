@@ -146,7 +146,7 @@ RASIS: dict[str, list[str]] = {
     "మేష": ["mesha", "mesham", "aries"],
     "వృషభ": ["vrishabha", "vrushabha", "taurus"],
     "మిథున": ["mithuna", "midhuna", "gemini"],
-    "కర్కాటక": ["karkataka", "kataka", "cancer", "కటక"],
+    "కర్కాటక": ["karkataka", "kataka", "cancer", "కటక", "కర్నాటక"],
     "సింహ": ["simha", "simham", "leo"],
     "కన్యా": ["kanya", "virgo", "కన్య"],
     "తులా": ["tula", "thula", "libra", "తుల"],

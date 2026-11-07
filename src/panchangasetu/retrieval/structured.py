@@ -6,6 +6,7 @@ are marked unverified). Dates outside every source return nothing, so callers ca
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -88,6 +89,22 @@ def render_day(row: PanchangaDay, document: str, following: PanchangaDay | None 
     return "\n".join(lines)
 
 
+def best_rows(rows: Iterable[tuple[PanchangaDay, str]]) -> dict[date, tuple[PanchangaDay, str]]:
+    """One row per day: the preferred source, except that a book row which yielded no elements
+    (festival rows can be unreadable) loses to a readable wall-calendar row. An answer marked
+    unverified beats a day that silently disappears from "next Purnima" searches."""
+
+    def rank(row: PanchangaDay) -> tuple[bool, int]:
+        return (not row.elements, SOURCE_PREFERENCE.index(row.source_kind))
+
+    best: dict[date, tuple[PanchangaDay, str]] = {}
+    for row, filename in rows:
+        current = best.get(row.day)
+        if current is None or rank(row) < rank(current[0]):
+            best[row.day] = (row, filename)
+    return best
+
+
 class StructuredRetriever:
     def __init__(self, sessions: sessionmaker[Session]) -> None:
         self.sessions = sessions
@@ -99,14 +116,7 @@ class StructuredRetriever:
             .join(Document, Document.id == DocumentVersion.document_id)
             .where(DocumentVersion.is_current.is_(True), PanchangaDay.day.between(start, end))
         ).all()
-        best: dict[date, tuple[PanchangaDay, str]] = {}
-        for row, filename in rows:
-            current = best.get(row.day)
-            if current is None or SOURCE_PREFERENCE.index(row.source_kind) < SOURCE_PREFERENCE.index(
-                current[0].source_kind
-            ):
-                best[row.day] = (row, filename)
-        return best
+        return best_rows(rows)
 
     def coverage(self) -> Coverage:
         with self.sessions() as s:

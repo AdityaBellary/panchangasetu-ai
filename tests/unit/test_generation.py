@@ -12,7 +12,11 @@ import pytest
 from panchangasetu.core.interfaces import ChatMessage, LLMError, LLMResult
 from panchangasetu.generation.answerer import AnswerService
 from panchangasetu.generation.prompts import ABSTAIN_EN, ABSTAIN_TE
-from panchangasetu.generation.templates import render_day_answer, render_occurrence_answer
+from panchangasetu.generation.templates import (
+    can_template_occurrences,
+    render_day_answer,
+    render_occurrence_answer,
+)
 from panchangasetu.generation.verify import check_answer, check_quotes, quote_support, strip_citation_markers
 from panchangasetu.providers.llm.openai_compatible import FallbackLLM, OpenAICompatibleChat
 from panchangasetu.query.dates import DateSpec
@@ -132,6 +136,13 @@ def test_occurrence_template_lists_next_two() -> None:
     out = render_occurrence_answer(occ, "en")
     assert out.splitlines()[0].startswith("Next Ekadasi: Friday, 20 November 2026")
     assert "until 2:04 AM on 21 Nov" in out and "After that" in out
+    assert "not verified" not in out
+    # A day only the wall calendar could read is still listed, and says so.
+    occ[0].verified = False
+    assert can_template_occurrences(occ)
+    first, second = render_occurrence_answer(occ, "en").splitlines()
+    assert "not verified against the book" in first and "not verified" not in second
+    assert "ధృవీకరించబడలేదు" in render_occurrence_answer(occ, "te").splitlines()[0]
 
 
 # ------------------------------------------------------------------ answer service
@@ -152,11 +163,14 @@ class FakeRetriever:
 
         self.glossary = Glossary({})
 
-    def retrieve(self, question: str, *, now: datetime | None = None) -> RetrievalResult:
+    def retrieve(
+        self, question: str, *, now: datetime | None = None, language: Language | None = None
+    ) -> RetrievalResult:
+        self.last_question = question
         route = Route(
             self.intent,
             self.mode,
-            Language(self.lang, "Latn", False, 0.0),
+            language or Language(self.lang, "Latn", False, 0.0),
             [DateSpec(NOW.date(), NOW.date(), "today", "day")],
             Slots(attributes=self.attrs),
             0.9,
@@ -302,3 +316,18 @@ def test_fallback_does_not_hide_our_own_bad_requests() -> None:
     llm = FallbackLLM([_chat(400, {"error": {"message": "bad field"}}), _chat(200, {})])
     with pytest.raises(LLMError, match="rejected"):
         llm.complete([ChatMessage("user", "hi")])
+
+
+def test_evidence_selection_keeps_exact_facts_and_mixes_collections() -> None:
+    from panchangasetu.generation.answerer import select_evidence
+
+    lists = [Evidence(f"p{i}", "chunk", "panchanga", "list", "book.pdf", [47 + i]) for i in range(5)]
+    rule = Evidence("g1", "chunk", "general", "rule", "book.pdf", [92])
+    day = Evidence("d1", "day", "panchanga", "day", "book.pdf", [132], date="2026-11-07", verified=True)
+    picked = select_evidence([day, *lists, rule], 5)
+    assert picked[0] is day and rule in picked and len(picked) == 5
+
+
+def test_citation_lead_ins_are_removed_with_their_markers() -> None:
+    assert strip_citation_markers("According to [S1], the months are Magha.") == "The months are Magha."
+    assert strip_citation_markers("Magha is good (S2).") == "Magha is good."

@@ -15,6 +15,7 @@ import re
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
+from itertools import zip_longest
 
 from panchangasetu.core.interfaces import LLM, LLMError
 from panchangasetu.generation.prompts import ABSTAIN_EN, ABSTAIN_TE, build_messages, retry_feedback
@@ -26,6 +27,7 @@ from panchangasetu.generation.templates import (
 )
 from panchangasetu.generation.verify import check_answer, check_quotes, strip_citation_markers
 from panchangasetu.observability.logging import get_logger
+from panchangasetu.query.language import Language
 from panchangasetu.query.router import PanchangaMode
 from panchangasetu.retrieval.evidence import Evidence
 from panchangasetu.retrieval.orchestrator import RetrievalResult, Retriever
@@ -61,6 +63,9 @@ class Answer:
     completion_tokens: int = 0
     cost_inr: float = 0.0
     latency_ms: dict[str, float] = field(default_factory=dict)
+    # Set by the conversation layer (Phase 6): the follow-up rewritten as a standalone question.
+    standalone_question: str | None = None
+    session_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,6 +77,20 @@ class Pricing:
 
     def cost(self, prompt_tokens: int, completion_tokens: int) -> float:
         return round((prompt_tokens * self.input_inr + completion_tokens * self.output_inr) / 1_000_000, 5)
+
+
+def select_evidence(evidence: list[Evidence], limit: int) -> list[Evidence]:
+    """Exact calendar facts first, then searched passages alternating between collections.
+
+    A HYBRID question ("which months are good for griha pravesham?") retrieves dated lists and
+    the rule that explains them; taking the first `limit` in retrieval order let the lists crowd
+    the rule out entirely."""
+    exact = [e for e in evidence if e.kind != "chunk"]
+    groups = [
+        [e for e in evidence if e.kind == "chunk" and e.collection == c] for c in ("general", "panchanga")
+    ]
+    mixed = [e for pair in zip_longest(*groups) for e in pair if e is not None]
+    return (exact + mixed)[:limit]
 
 
 def _citation(e: Evidence) -> Citation:
@@ -111,16 +130,16 @@ class AnswerService:
         self.escalation = escalation
         self.escalation_max_tokens = escalation_max_tokens
 
-    def ask(self, question: str, *, now: datetime | None = None) -> Answer:
+    def ask(self, question: str, *, now: datetime | None = None, language: Language | None = None) -> Answer:
         t0 = time.perf_counter()
         now = now or self.retriever.clock()
-        r = self.retriever.retrieve(question, now=now)
+        r = self.retriever.retrieve(question, now=now, language=language)
         lang = r.route.language.code
         route = f"{r.route.intent.value}/{r.route.mode.value}"
         base = {"question": question, "language": lang, "route": route}
         timings = {"retrieve": r.timings_ms.get("total", 0.0)}
 
-        evidence = r.evidence[:_MAX_EVIDENCE]
+        evidence = select_evidence(r.evidence, _MAX_EVIDENCE)
         if not evidence:
             return self._done(
                 base,

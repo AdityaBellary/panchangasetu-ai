@@ -9,7 +9,7 @@
 {"id": "a09", "q": "మకర రాశి వారికి ఉద్యోగ ఫలితాలు ఎలా ఉన్నాయి?", "expect": "answer", "must": [["ఉద్యోగ"]], "now": "2026-11-07T09:00"}
 {"id": "a10", "q": "What is Kuja dosha and when is it not a problem for marriage?", "expect": "answer", "must": [["Jupiter", "Guru", "Brihaspati", "Bṛhaspati"], ["Moon", "Chandra"]], "now": "2026-11-07T09:00"}
 {"id": "a11", "q": "Which months are good for griha pravesham?", "expect": "answer", "must": [["Magha", "మాఘ"], ["Vaisakha", "Vaishakha", "వైశాఖ"]], "now": "2026-11-07T09:00"}
-{"id": "a12", "q": "What does it mean if a lizard falls on the left eye?", "expect": "answer", "must": [["humiliation", "insult", "dishonour", "disgrace", "అవమాన"]], "now": "2026-11-07T09:00"}
+{"id": "a12", "q": "What does it mean if a lizard falls on the left eye?", "expect": "answer", "must": [["humiliation", "insult", "dishonour", "dishonor", "disgrace", "అవమాన"]], "now": "2026-11-07T09:00"}
 {"id": "a13", "q": "బల్లి కుడి కంటి మీద పడితే ఏమవుతుంది?", "expect": "answer", "must": [["పరాజయ"]], "now": "2026-11-07T09:00"}
 {"id": "a14", "q": "Who is the king of the Parabhava samvatsara?", "expect": "answer", "must": [["Jupiter", "Guru", "గురు"]], "now": "2026-11-07T09:00"}
 {"id": "a15", "q": "తర్పణం ఏ క్రమంలో ఇవ్వాలి?", "expect": "answer", "must": [["తల్లిదండ్రుల"]], "now": "2026-11-07T09:00"}

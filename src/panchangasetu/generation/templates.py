@@ -152,8 +152,9 @@ def render_day_answer(ev: Evidence, attributes: list[str], lang: str) -> str:
 
 
 def can_template_occurrences(evidence: list[Evidence]) -> bool:
-    occ = [e for e in evidence if e.kind == "occurrence"]
-    return bool(occ) and all(e.verified for e in occ)
+    # Unverified occurrences (wall calendar only) are templated too, with an explicit note: an LLM
+    # handed a mix of verified and unverified days has skipped the unverified one (Phase 6 eval).
+    return any(e.kind == "occurrence" for e in evidence)
 
 
 def render_occurrence_answer(evidence: list[Evidence], lang: str) -> str:
@@ -169,7 +170,8 @@ def render_occurrence_answer(evidence: list[Evidence], lang: str) -> str:
             head = "తదుపరి" if i == 0 else "ఆ తరువాత"
             ctx = f" ({'అధిక ' if m.get('adhika') else ''}{masa} {paksha} {m['name']})" if masa else ""
             when = f"{d.day} {_MONTHS_TE[d.month - 1]} {d.year} ({_WEEKDAY_TE[d.weekday()]})"
-            lines.append(f"{head} {m['name']}: {when}{ctx}, {_te_time(m.get('ends_at'), d)} వరకు.")
+            note = " (గోడ క్యాలెండర్ ప్రకారం; పుస్తకంతో ధృవీకరించబడలేదు)" if not ev.verified else ""
+            lines.append(f"{head} {m['name']}: {when}{ctx}, {_te_time(m.get('ends_at'), d)} వరకు{note}.")
         else:
             head = "Next" if i == 0 else "After that"
             name = _en_name(kind, m["name"])
@@ -177,7 +179,7 @@ def render_occurrence_answer(evidence: list[Evidence], lang: str) -> str:
             if masa:
                 adhika = "Adhika " if m.get("adhika") else ""
                 ctx = f" ({adhika}{english_name(MASAS, masa)} {_PAKSHA_EN.get(paksha or '', '')} {name})"
-            lines.append(
-                f"{head} {name}: {d.strftime('%A, %d %B %Y')}{ctx}, until {_en_time(m.get('ends_at'), d)}."
-            )
+            note = " (wall calendar only; not verified against the book)" if not ev.verified else ""
+            until = _en_time(m.get("ends_at"), d)
+            lines.append(f"{head} {name}: {d.strftime('%A, %d %B %Y')}{ctx}, until {until}{note}.")
     return "\n".join(lines)

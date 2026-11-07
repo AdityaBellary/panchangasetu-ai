@@ -1,0 +1,253 @@
+{
+  "summary": {
+    "follow_ups": 12,
+    "rewrite_accuracy": 1.0,
+    "answer_accuracy_all_turns": 0.864,
+    "answer_accuracy_follow_ups": 0.833,
+    "total_cost_inr": 0.875
+  },
+  "results": [
+    {
+      "id": "c01.1",
+      "q": "What is today's tithi?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "Saturday, 07 November 2026\nTithi: Trayodasi until 10:29 AM; then Chaturdasi.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "What is today's tithi?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c01.2",
+      "q": "and tomorrow?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "Sunday, 08 November 2026\nTithi: Chaturdasi until 10:34 AM; then Amavasya.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "What is tomorrow's tithi?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c01.3",
+      "q": "and the nakshatram?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "Sunday, 08 November 2026\nNakshatram: Swati until beyond the next sunrise.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "What is tomorrow's nakshatram?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c02.1",
+      "q": "ఈరోజు తిథి ఏమిటి?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "7 నవంబర్ 2026 (శనివారం)\nతిథి: త్రయోదశి ఉదయం 10:29 వరకు, తరువాత చతుర్దశి.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "ఈరోజు తిథి ఏమిటి?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c02.2",
+      "q": "రేపు?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "8 నవంబర్ 2026 (ఆదివారం)\nతిథి: చతుర్దశి ఉదయం 10:34 వరకు, తరువాత అమావాస్య.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "రేపు తిథి ఏమిటి?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c03.1",
+      "q": "When is the next Ekadashi?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "Next Ekadasi: Friday, 20 November 2026 (Kartika Shukla paksha Ekadasi), until 2:04 AM on 21 Nov.\nAfter that Ekadasi: Friday, 04 December 2026 (Kartika Krishna paksha Ekadasi), until 1:36 AM on 05 Dec.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "When is the next Ekadashi?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c03.2",
+      "q": "and Purnima?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "Next Purnima: Tuesday, 24 November 2026, until beyond the next sunrise (wall calendar only; not verified against the book).\nAfter that Purnima: Thursday, 24 December 2026 (Margashira Shukla paksha Purnima), until 8:07 AM.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "When is the next Purnima?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c03.3",
+      "q": "what is the nakshatram that day?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "For 2026-11-24, the Nakshatra is కృత్తిక (Krittika). According to an unverified reading of the wall calendar, it ends beyond the next sunrise (printed రా.1-01).",
+      "method": "llm",
+      "cost_inr": 0.03836,
+      "standalone": "what is the nakshatram 24 November 2026?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c04.1",
+      "q": "వచ్చే ఏకాదశి ఎప్పుడు?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "తదుపరి ఏకాదశి: 20 నవంబర్ 2026 (శుక్రవారం) (కార్తీకం శుద్ధ ఏకాదశి), 21 నవంబర్ తెల్లవారుజాము 2:04 వరకు.\nఆ తరువాత ఏకాదశి: 4 డిసెంబర్ 2026 (శుక్రవారం) (కార్తీకం బహుళ ఏకాదశి), 5 డిసెంబర్ తెల్లవారుజాము 1:36 వరకు.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "వచ్చే ఏకాదశి ఎప్పుడు?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c04.2",
+      "q": "దాని ప్రాముఖ్యత ఏమిటి?",
+      "follow_up": true,
+      "answer_ok": false,
+      "answer": "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు.",
+      "method": "abstain",
+      "cost_inr": 0.05092,
+      "standalone": "ఏకాదశి ప్రాముఖ్యత ఏమిటి?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c05.1",
+      "q": "What are the yearly predictions for Kanya rasi?",
+      "follow_up": false,
+      "answer_ok": false,
+      "answer": "The provided sources contain monthly results for Kanya rasi (Virgo) from March to January, but do not contain a consolidated 'yearly predictions' (సంవత్సర ఫలితములు) section. The general yearly outlook states that Shani sanchara kalam brings stability in marital relations, partnership, and profession; the lucky number is 5; and favorable days are Aadi, Budha, Shukra, and Shani varalu.",
+      "method": "llm",
+      "cost_inr": 0.04983,
+      "standalone": "What are the yearly predictions for Kanya rasi?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c05.2",
+      "q": "and Tula?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "For Tula (తులారాశి), the yearly predictions indicate that Shanaishcharuni (శనైశ్చరుని) Shashtarashtra sancharam (షష్ఠరాశి సంచారం) is highly favourable, bringing growth in land and property, wealth, and discipline in profession and job. Rahukethuvulu (రాహుకేతువులు) give favourable results until 2026 December 5th, and from 2026 December 6th, they give special auspicious results. Guru (గురుడు) gives favourable results until 2026 June 1st and ordinary results from 2026 June 2nd. Monthly results for 2027 include January suggesting illegal money earning, February enjoying arts, March-April bringing domestic comfort, and December bringing wealth growth.",
+      "method": "llm",
+      "cost_inr": 0.12693,
+      "standalone": "What are the yearly predictions for Tula?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c06.1",
+      "q": "మకర రాశి వారికి ఉద్యోగ ఫలితాలు ఎలా ఉన్నాయి?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "మకర రాశి వారికి ఉద్యోగ ఫలితాలు అనుకూలంగా ఉన్నాయి. మే నెలలో ఉద్యోగులు ప్రమోషన్ లేదా వేతన పెంపును పొందుతారు. జూన్ నెలలో బంధువులు, కుటుంబ సభ్యులు మరియు స్నేహితులు వీరి విలువను గుర్తిస్తారు. నవంబర్ నెలలో ఉద్యోగులకు ప్రమోషన్, జీతం పెంపు అవకాశం ఉంది మరియు కొత్త అవకాశాలను పొందుతారు. డిసెంబర్ నెలలో పై అధికారుల నుండి గుర్తింపు పొందుతారు.",
+      "method": "llm",
+      "cost_inr": 0.05199,
+      "standalone": "మకర రాశి వారికి ఉద్యోగ ఫలితాలు ఎలా ఉన్నాయి?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c06.2",
+      "q": "కన్యా రాశికి?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "కన్యారాశి (Virgo) వారికి ఉద్యోగ మరియు వృత్తిపరమైన ఫలితాలు అనుకూలంగా ఉన్నాయి. వృత్తి గౌరవం పెరుగుతుంది, అనుకూల వాతావరణం ఉంటుంది మరియు గత సంవత్సరం సవాళ్లను అధిగమిస్తారు. వృత్తిపరమైన అవకాశాలు వస్తాయి మరియు పని చేసే చోట వృద్ధి, ప్రోత్సాహం లభిస్తాయి. భాగస్వామ్య వ్యాపారాలకు మంచి కాలం. అయితే, గురుడు జూన్ 1 వరకు దశమ స్థానమందు సామాన్య ఫలితములను, జూన్ 2 నుండి ఏకాదశ స్థానమందు ధననాశమును కలుగజేయును.",
+      "method": "llm",
+      "cost_inr": 0.05774,
+      "standalone": "కన్యా రాశి వారికి ఉద్యోగ ఫలితాలు ఎలా ఉన్నాయి?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c07.1",
+      "q": "What is Kuja dosha?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "Kuja dosha (కుజదోషము) is a defect caused by Mars (కుజుడు) located in specific houses in a birth chart. It is absent when Mars is in the 2nd, 4th, 7th, 8th, or 12th house, or when it is conjunct Jupiter or the Moon. For bride and groom, if Mars is present in the 1-2-4-7-8-12 positions from the Lagna, Moon, or Venus, the couple will enjoy long-term happiness. If only one partner has this dosha, the marriage will not prosper and may lead to the death of a son or fear of death.",
+      "method": "llm",
+      "cost_inr": 0.1293,
+      "standalone": "What is Kuja dosha?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c07.2",
+      "q": "when is it not a problem for marriage?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "Kuja dosha is not a problem for marriage when both bride and groom have it in the 2nd, 4th, 7th, 8th, or 12th houses from Lagna, Chandra, and Shukra. It is also absent when Mars is in Cancer, Leo, Capricorn, or when Mars is conjoined with Jupiter or the Moon. Additionally, there is no Kuja dosha for those born in Cancer, Leo, or Capricorn, or in Mars's friendly signs.",
+      "method": "llm",
+      "cost_inr": 0.13179,
+      "standalone": "when is Kuja dosha not a problem for marriage?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c08.1",
+      "q": "What is the varjyam on 15 December 2026?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "Tuesday, 15 December 2026\nVarjyam: 4:03 PM to 5:45 PM.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "What is the varjyam on 15 December 2026?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c08.2",
+      "q": "and rahukalam?",
+      "follow_up": true,
+      "answer_ok": false,
+      "answer": "I don't have enough information in the available documents to answer this question accurately.",
+      "method": "abstain",
+      "cost_inr": 0.11148,
+      "standalone": "What is the rahukalam on 15 December 2026?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c09.1",
+      "q": "When is Deepavali?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "Deepavali (దీపావళి పండుగ) is on 2026-11-08 Sunday (ఆదివారం).",
+      "method": "llm",
+      "cost_inr": 0.02184,
+      "standalone": "When is Deepavali?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c09.2",
+      "q": "what is the tithi on that day?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "Sunday, 08 November 2026\nTithi: Chaturdasi until 10:34 AM; then Amavasya.",
+      "method": "template",
+      "cost_inr": 0.0,
+      "standalone": "what is the tithi on 8 November 2026?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c10.1",
+      "q": "What does it mean if a lizard falls on the left eye?",
+      "follow_up": false,
+      "answer_ok": true,
+      "answer": "According to the TTD panchangam, if a lizard falls on the left eye (ఎడమకన్ను), it indicates dishonour (అవమానము).",
+      "method": "llm",
+      "cost_inr": 0.05223,
+      "standalone": "What does it mean if a lizard falls on the left eye?",
+      "rewrite_ok": true
+    },
+    {
+      "id": "c10.2",
+      "q": "What is the capital of France?",
+      "follow_up": true,
+      "answer_ok": true,
+      "answer": "I don't have enough information in the available documents to answer this question accurately.",
+      "method": "abstain",
+      "cost_inr": 0.05244,
+      "standalone": "What is the capital of France?",
+      "rewrite_ok": true
+    }
+  ]
+}

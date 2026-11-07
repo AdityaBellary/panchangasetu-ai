@@ -10,6 +10,7 @@ from pathlib import Path
 from sqlalchemy import func, select
 
 from panchangasetu.config import Settings, get_settings
+from panchangasetu.conversation.service import ConversationService
 from panchangasetu.generation.answerer import Answer, AnswerService
 from panchangasetu.ingestion.pipeline import IngestionPipeline
 from panchangasetu.observability.logging import configure_logging
@@ -201,7 +202,25 @@ def build_answer_service(settings: Settings) -> AnswerService:
     return AnswerService(build_retriever(settings), build_llm(settings), escalation=escalation)
 
 
+def build_conversation_service(settings: Settings) -> ConversationService:
+    from panchangasetu.conversation.followup import FollowUpResolver
+    from panchangasetu.conversation.store import SqlSessionStore
+
+    answers = build_answer_service(settings)
+    resolver = FollowUpResolver(answers.llm if settings.followup_llm_rewrite else None)
+    store = SqlSessionStore(make_session_factory(make_engine(settings.database_url)))
+    return ConversationService(
+        answers,
+        store,
+        resolver,
+        history_turns=settings.conversation_history_turns,
+        idle_minutes=settings.conversation_idle_minutes,
+    )
+
+
 def _print_answer(a: AnswerService | None, ans: Answer, verbose: bool) -> None:
+    if ans.standalone_question and ans.standalone_question != ans.question:
+        print(f"(understood as: {ans.standalone_question})")
     print(ans.answer)
     if ans.citations and not ans.abstained:
         print("\nSources:")
@@ -231,8 +250,12 @@ def cmd_ask(settings: Settings, args: argparse.Namespace) -> int:
 
 
 def cmd_chat(settings: Settings, args: argparse.Namespace) -> int:
-    service = build_answer_service(settings)
-    print("PanchangaSetu chat. Ask in Telugu or English. Empty line or Ctrl-D to exit.")
+    from panchangasetu.conversation.store import SessionNotFound
+
+    service = build_conversation_service(settings)
+    session_id = args.session or service.start()
+    print('PanchangaSetu chat. Ask in Telugu or English; follow-ups like "and tomorrow?" work.')
+    print(f"Session {session_id}  (/new starts a fresh conversation; empty line or Ctrl-D exits)")
     while True:
         try:
             q = input("\n> ").strip()
@@ -240,7 +263,17 @@ def cmd_chat(settings: Settings, args: argparse.Namespace) -> int:
             break
         if not q:
             break
-        _print_answer(service, service.ask(q), args.verbose)
+        if q == "/new":
+            session_id = service.start()
+            print(f"New session {session_id}")
+            continue
+        try:
+            ans = service.ask(q, session_id=session_id)
+        except SessionNotFound:
+            print(f"Unknown session {session_id}; starting a new one.")
+            session_id = service.start()
+            ans = service.ask(q, session_id=session_id)
+        _print_answer(None, ans, args.verbose)
     return 0
 
 
@@ -387,6 +420,7 @@ def main(argv: list[str] | None = None) -> int:
     ak.add_argument("-v", "--verbose", action="store_true", help="show method, route, model, cost, latency")
     ch = sub.add_parser("chat", help="interactive question answering in the terminal")
     ch.add_argument("-v", "--verbose", action="store_true")
+    ch.add_argument("--session", help="resume an existing session id")
     sub.add_parser("status", help="show ingestion status per document")
     sp = sub.add_parser("show-page", help="print the extracted text of one page")
     sp.add_argument("document")

@@ -49,6 +49,24 @@ def test_headings_start_new_chunks_and_become_heading_path() -> None:
     assert [c.heading_path for c in chunks] == [["కన్యారాశి ఫలితములు"], ["తులారాశి ఫలితములు"]]
 
 
+def test_untagged_rasi_title_line_becomes_a_heading_and_monthly_results_nest_under_it() -> None:
+    # OCR tagged the Tula title as a plain paragraph; "నెలవారీ ఫలితములు" repeats in every sign.
+    header = "తులారాశి ఫలితములు\n(చిత్త : 3,4 పాదములు)\nఆదాయం - 05 వ్యయం - 14"
+    text = f"{header}\n\n{SENTENCE}\n\n## నెలవారీ ఫలితములు\n\n{SENTENCE}"
+    chunks = chunker(target=500, maximum=600).chunk([page(32, text)])
+    assert [c.heading_path for c in chunks] == [
+        ["తులారాశి ఫలితములు", "(చిత్త : 3,4 పాదములు)", "ఆదాయం - 05 వ్యయం - 14"],
+        ["తులారాశి ఫలితములు", "నెలవారీ ఫలితములు"],
+    ]
+    assert all("తులారాశి ఫలితములు" not in c.text for c in chunks)
+
+
+def test_monthly_results_nest_under_the_specific_sign_not_the_book_title() -> None:
+    text = f"## శ్రీ పరాభవనామ సంవత్సర రాశి ఫలితములు\nమేషరాశి ఫలితములు\n\n{SENTENCE}\n\n## నెలవారీ ఫలితములు\n\n{SENTENCE}"
+    chunks = chunker(target=500, maximum=600).chunk([page(23, text)])
+    assert chunks[-1].heading_path == ["మేషరాశి ఫలితములు", "నెలవారీ ఫలితములు"]
+
+
 def test_chunks_never_mix_collections_and_track_page_spans() -> None:
     pages = [
         page(1, SENTENCE),

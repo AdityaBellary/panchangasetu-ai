@@ -101,6 +101,13 @@ class Settings(BaseSettings):
     escalation_model: str = ""  # off by default: on large prompts sarvam-105b needs >4k reasoning tokens
     llm_timeout_s: float = Field(60.0, gt=0)
 
+    # --- conversations ---
+    conversation_history_turns: int = Field(3, ge=0, le=20)  # earlier questions used to resolve a follow-up
+    conversation_idle_minutes: float = Field(60.0, gt=0)  # older turns are no longer context
+    # Follow-ups the rules cannot place ("what are its remedies?") are rewritten by the chat LLM
+    # (~₹0.01 each). False: such questions are answered as typed.
+    followup_llm_rewrite: bool = True
+
     # --- chunking ------------------------------------------------------------------------
     chunk_min_tokens: int = Field(30, ge=0)
     chunk_target_tokens: int = Field(350, ge=50)
@@ -112,7 +119,7 @@ class Settings(BaseSettings):
     # Bump these when the corresponding logic changes; the pipeline uses them to decide
     # what to recompute (OCR is the expensive step and is only redone on extraction bumps).
     extraction_version: str = "ext-1"
-    chunker_version: str = "chunk-5"
+    chunker_version: str = "chunk-7"
 
 
 @lru_cache(maxsize=1)

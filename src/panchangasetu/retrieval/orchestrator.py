@@ -17,6 +17,7 @@ from datetime import datetime
 from qdrant_client import models
 
 from panchangasetu.query.dates import Clock
+from panchangasetu.query.language import Language
 from panchangasetu.query.rewrite import Glossary, expand_query
 from panchangasetu.query.router import PanchangaMode, QueryRouter, Route
 from panchangasetu.retrieval.evidence import Evidence
@@ -61,10 +62,12 @@ class Retriever:
         self.candidates = candidates
         self.hybrid_min_telugu_ratio = hybrid_min_telugu_ratio
 
-    def retrieve(self, question: str, *, now: datetime | None = None) -> RetrievalResult:
+    def retrieve(
+        self, question: str, *, now: datetime | None = None, language: Language | None = None
+    ) -> RetrievalResult:
         t0 = time.perf_counter()
         now = now or self.clock()
-        route = self.router.route(question, now.date())
+        route = self.router.route(question, now.date(), language=language)
         query = expand_query(question, route.language, route.slots, self.glossary)
         result = RetrievalResult(question, route, query)
         result.timings_ms["route"] = (time.perf_counter() - t0) * 1000

@@ -135,12 +135,18 @@ def _squash(text: str) -> str:
 
 
 CITATION_MARKER_RE = re.compile(r"\s*[\[(]?\bS\d{1,2}\b[\])]?")
+# "According to [S1], …" loses its object once the marker goes; drop the lead-in with it.
+_LEAD_IN_RE = re.compile(
+    r"\b(?:according to|as per|as stated in|as mentioned in)\s*(?:the\s+)?[\[(]?S\d{1,2}[\])]?,?\s*", re.I
+)
 
 
 def strip_citation_markers(text: str) -> str:
     """Models sometimes write "(S3)" inline; citations are returned separately, so drop them
     (and never let "S2" be read as the number 2)."""
-    return re.sub(r"\s+([.,;:])", r"\1", CITATION_MARKER_RE.sub("", text)).strip()
+    text = _LEAD_IN_RE.sub("", text)
+    text = re.sub(r"\s+([.,;:])", r"\1", CITATION_MARKER_RE.sub("", text)).strip()
+    return text[:1].upper() + text[1:] if text[:1].isascii() else text
 
 
 def _grams(text: str, n: int = 4) -> set[str]:

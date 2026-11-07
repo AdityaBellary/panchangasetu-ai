@@ -102,8 +102,10 @@ class QueryRouter:
         self.semantic = semantic
         self.min_confidence = min_confidence
 
-    def route(self, text: str, today: date) -> Route:
-        lang = detect_language(text)
+    def route(self, text: str, today: date, *, language: Language | None = None) -> Route:
+        # `language` overrides detection when the text was rewritten from a follow-up: the answer
+        # follows the language the user actually typed, not the words added from earlier turns.
+        lang = language or detect_language(text)
         dates = parse_dates(text, today)
         slots = extract_slots(text)
         day_attrs = [a for a in slots.attributes if a in DAY_ATTRIBUTES]

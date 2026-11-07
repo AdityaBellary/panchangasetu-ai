@@ -178,3 +178,16 @@ def test_festival_range_question_returns_exact_events(env) -> None:  # type: ign
     _, retriever = env
     r = retriever.retrieve("Festivals this week", now=NOW)
     assert any(e.kind == "event" and e.date == "2026-11-08" for e in r.evidence)
+
+
+def test_unreadable_book_row_yields_to_the_wall_calendar() -> None:
+    from types import SimpleNamespace
+
+    from panchangasetu.retrieval.structured import best_rows
+
+    day = date(2026, 11, 24)
+    book = SimpleNamespace(day=day, source_kind="book_daily_table", elements=[])
+    wall = SimpleNamespace(day=day, source_kind="wall_calendar", elements=[{"kind": "tithi"}])
+    assert best_rows([(book, "book.pdf"), (wall, "wall.pdf")])[day][1] == "wall.pdf"  # type: ignore[list-item]
+    book.elements = [{"kind": "tithi"}]
+    assert best_rows([(wall, "wall.pdf"), (book, "book.pdf")])[day][1] == "book.pdf"  # type: ignore[list-item]
