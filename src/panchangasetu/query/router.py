@@ -12,6 +12,7 @@ An LLM classifier can be slotted in behind `SemanticClassifier` later without ch
 
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -132,6 +133,12 @@ class QueryRouter:
             return route(Intent.GENERAL, PanchangaMode.NONE, 0.85, "conceptual question, no date/when")
         if slots.general_topic and not slots.when:
             return route(Intent.GENERAL, PanchangaMode.NONE, 0.8, "general topic (predictions/rules/omens)")
+
+        if not dates and re.search(r"which months?|what months?|ఏ మాస|ఏ నెల|ye masam|ye nela", text, re.I):
+            # "Which months are good for X" asks for a rule (General) that dated lists only illustrate.
+            return route(
+                Intent.HYBRID, PanchangaMode.SEARCH, 0.75, "which-months question: rules + dated lists"
+            )
 
         if self.semantic is None:
             return route(Intent.HYBRID, PanchangaMode.SEARCH, 0.5, "no rule matched; no semantic router")

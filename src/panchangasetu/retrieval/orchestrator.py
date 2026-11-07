@@ -83,7 +83,18 @@ class Retriever:
             targeted = " ".join([*(_ATTRIBUTE_TE[a] for a in sorted(missing)), *weekdays, *sorted(missing)])
             result.evidence += self._search("general", targeted, limit=3)
         if route.wants_general:
-            result.evidence += self._search("general", query, limit=self.top_k)
+            if route.slots.rasi:
+                # Rasi predictions of neighbouring signs share pages and vocabulary; facts from the
+                # wrong sign must never reach the answer. Search only the predictions section, with
+                # the sign's own section title in the query, then keep only chunks headed by that sign.
+                section: list[models.Condition] = [
+                    models.FieldCondition(key="section_type", match=models.MatchValue(value="rasi_phalalu"))
+                ]
+                targeted = f"{route.slots.rasi}రాశి ఫలితములు {query}"
+                hits = self._search("general", targeted, limit=40, must=section)
+                result.evidence += _only_rasi(hits, route.slots.rasi)[: self.top_k]
+            else:
+                result.evidence += self._search("general", query, limit=self.top_k)
         result.timings_ms["general"] = (time.perf_counter() - t2) * 1000
         result.evidence = _dedupe(result.evidence)
         result.timings_ms["total"] = (time.perf_counter() - t0) * 1000
@@ -127,8 +138,9 @@ class Retriever:
         limit: int,
         from_date: str | None = None,
         date_range: tuple[int, int] | None = None,
+        must: list[models.Condition] | None = None,
     ) -> list[Evidence]:
-        must: list[models.Condition] = []
+        must = list(must or [])
         if date_range:
             must.append(
                 models.FieldCondition(
@@ -163,7 +175,7 @@ class Retriever:
                     id=str(h.id),
                     kind=str(p.get("kind", "chunk")),
                     collection=collection,
-                    text=str(p.get("text", "")),
+                    text=_with_heading(p),
                     document=str(p.get("document", "")),
                     pages=list(p.get("pages", [])),
                     date=p.get("date"),
@@ -192,3 +204,29 @@ def _dedupe(items: list[Evidence]) -> list[Evidence]:
             seen.add(e.id)
             out.append(e)
     return out
+
+
+def _with_heading(payload: dict[str, object]) -> str:
+    """Chunk text as shown to the answer model, prefixed with its section heading. A chunk from
+    the middle of "కన్యారాశి ఫలితములు" does not repeat the rasi name; without the heading the model
+    cannot tell which rasi it is about."""
+    text = str(payload.get("text", ""))
+    headings = payload.get("heading_path") or []
+    if isinstance(headings, list) and headings:
+        return f"[Section: {' > '.join(str(h) for h in headings)}]\n{text}"
+    return text
+
+
+def _only_rasi(items: list[Evidence], rasi: str) -> list[Evidence]:
+    """Drop rasi-prediction chunks whose section heading names a different sign."""
+    from panchangasetu.telugu.lexicon import RASIS
+
+    forms = [rasi, *(a for a in RASIS[rasi] if not a.isascii())]
+    kept = []
+    for e in items:
+        if e.source_kind != "rasi_phalalu":
+            continue  # the question is about a sign: other sections only add noise
+        heading = " ".join(str(h) for h in e.data.get("heading_path", []))
+        if any(f in heading for f in forms):
+            kept.append(e)
+    return kept

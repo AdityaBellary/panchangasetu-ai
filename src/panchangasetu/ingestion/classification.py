@@ -46,6 +46,7 @@ class PageRule:
     collection: Collection | None
     section_type: str | None
     ocr_engine: OCREngineName | None
+    columns: int | None = None  # 2 = OCR the two columns separately (two-column lists/tables)
 
 
 @dataclass(slots=True)
@@ -61,6 +62,7 @@ class PagePlan:
     collection: Collection | None
     section_type: str | None
     ocr_engine: OCREngineName | None
+    columns: int | None = None  # 2 = OCR the two columns separately (two-column lists/tables)
 
 
 class CollectionRules:
@@ -85,6 +87,7 @@ class CollectionRules:
                         collection=Collection(collection) if collection else None,
                         section_type=r.get("section_type"),
                         ocr_engine=r.get("ocr_engine"),
+                        columns=int(r["columns"]) if r.get("columns") else None,
                     )
                 )
             docs.append(doc)
@@ -95,6 +98,7 @@ class CollectionRules:
         collection: Collection | None = None
         section_type: str | None = None
         engine: OCREngineName | None = None
+        columns: int | None = None
         name = Path(source_path).name
         for doc in self._documents:
             if not (fnmatch.fnmatch(source_path, doc.match) or fnmatch.fnmatch(name, doc.match)):
@@ -105,7 +109,8 @@ class CollectionRules:
                 collection = rule.collection or collection
                 section_type = rule.section_type or section_type
                 engine = rule.ocr_engine or engine
-        return PagePlan(collection=collection, section_type=section_type, ocr_engine=engine)
+                columns = rule.columns or columns
+        return PagePlan(collection=collection, section_type=section_type, ocr_engine=engine, columns=columns)
 
 
 # Thresholds tuned on the 176-page TTD panchangam (first full run, 2026-11-07): explanatory

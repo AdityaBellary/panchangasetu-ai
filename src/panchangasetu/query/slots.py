@@ -110,6 +110,7 @@ WEAK_CONCEPT_MARKERS = [
 @dataclass(slots=True)
 class Slots:
     attributes: list[str] = field(default_factory=list)
+    rasi: str | None = None  # canonical Telugu stem ("కన్యా") when the question names a zodiac sign
     tithi: str | None = None  # canonical Telugu name
     nakshatra: str | None = None
     when: bool = False  # "when / next / ఎప్పుడు"
@@ -154,6 +155,7 @@ def extract_slots(text: str) -> Slots:
         rest = h.replace("దుర్ముహూర్తం", " ").replace("durmuhurtham", " ").replace("durmuhurtam", " ")
         if not any(_contains(rest, t.lower()) for t in ATTRIBUTES["muhurtham"]):
             slots.attributes.remove("muhurtham")
+    slots.rasi = _rasi(h)
     slots.tithi = _name(h, TITHIS)
     slots.nakshatra = _name(h, NAKSHATRAS)
     # A bare nakshatra name (e.g. "hasta") inside other words is common in English text;
@@ -195,3 +197,16 @@ def _residual(h: str, slots: Slots) -> list[str]:
             continue
         out.append(tok)
     return out
+
+
+def _rasi(h: str) -> str | None:
+    from panchangasetu.telugu.lexicon import RASIS
+
+    for stem, aliases in RASIS.items():
+        for form in (stem, *aliases):
+            if form.isascii():
+                if re.search(rf"(?<![a-z]){form}(?:\s*ras[hi]+)?(?![a-z])", h):
+                    return stem
+            elif re.search(rf"{form}\s*రాశి|{form}రాశి", h):  # Telugu needs "రాశి": "కన్య" alone is "girl"
+                return stem
+    return None

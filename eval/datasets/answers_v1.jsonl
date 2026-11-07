@@ -1,0 +1,22 @@
+{"id": "a01", "q": "What is today's nakshatram?", "expect": "answer", "must": [["Chitta", "చిత్త"]], "now": "2026-11-07T09:00"}
+{"id": "a02", "q": "ఈరోజు తిథి ఏమిటి?", "expect": "answer", "must": [["త్రయోదశి"], ["10:29"]], "now": "2026-11-07T09:00"}
+{"id": "a03", "q": "When is the next Ekadashi?", "expect": "answer", "must": [["20 November", "20 Nov"]], "now": "2026-11-07T09:00"}
+{"id": "a04", "q": "వచ్చే పౌర్ణమి ఎప్పుడు?", "expect": "answer", "must": [["24 డిసెంబర్", "డిసెంబర్ 24"]], "now": "2026-11-07T09:00"}
+{"id": "a05", "q": "What is the varjyam on 15 December 2026?", "expect": "answer", "must": [["Varjyam", "varjyam"]], "now": "2026-11-07T09:00"}
+{"id": "a06", "q": "దీపావళి పండుగ ఎప్పుడు?", "expect": "answer", "must": [["2026-11-08", "8 నవంబర్", "నవంబర్ 8", "November 8", "8 November"]], "now": "2026-11-07T09:00"}
+{"id": "a07", "q": "When is Vaikuntha Ekadasi?", "expect": "answer", "must": [["2026-12-20", "20 December", "December 20", "20 Dec"]], "now": "2026-11-07T09:00"}
+{"id": "a08", "q": "What are the yearly predictions for Kanya rasi?", "expect": "answer", "must": [["June 1", "1 June"], ["tenth", "10th"]], "now": "2026-11-07T09:00"}
+{"id": "a09", "q": "మకర రాశి వారికి ఉద్యోగ ఫలితాలు ఎలా ఉన్నాయి?", "expect": "answer", "must": [["ఉద్యోగ"]], "now": "2026-11-07T09:00"}
+{"id": "a10", "q": "What is Kuja dosha and when is it not a problem for marriage?", "expect": "answer", "must": [["Jupiter", "Guru", "Brihaspati", "Bṛhaspati"], ["Moon", "Chandra"]], "now": "2026-11-07T09:00"}
+{"id": "a11", "q": "Which months are good for griha pravesham?", "expect": "answer", "must": [["Magha", "మాఘ"], ["Vaisakha", "Vaishakha", "వైశాఖ"]], "now": "2026-11-07T09:00"}
+{"id": "a12", "q": "What does it mean if a lizard falls on the left eye?", "expect": "answer", "must": [["humiliation", "insult", "dishonour", "disgrace", "అవమాన"]], "now": "2026-11-07T09:00"}
+{"id": "a13", "q": "బల్లి కుడి కంటి మీద పడితే ఏమవుతుంది?", "expect": "answer", "must": [["పరాజయ"]], "now": "2026-11-07T09:00"}
+{"id": "a14", "q": "Who is the king of the Parabhava samvatsara?", "expect": "answer", "must": [["Jupiter", "Guru", "గురు"]], "now": "2026-11-07T09:00"}
+{"id": "a15", "q": "తర్పణం ఏ క్రమంలో ఇవ్వాలి?", "expect": "answer", "must": [["తల్లిదండ్రుల"]], "now": "2026-11-07T09:00"}
+{"id": "a16", "q": "Rahu kalam on Friday", "expect": "answer", "must": [["10:30", "10-30", "10.30", "10½"]], "now": "2026-11-07T09:00"}
+{"id": "n01", "q": "What is the tithi on 15 August 2030?", "expect": "abstain", "must": [], "now": "2026-11-07T09:00"}
+{"id": "n02", "q": "What is the capital of France?", "expect": "abstain", "must": [], "now": "2026-11-07T09:00"}
+{"id": "n03", "q": "Who won the IPL in 2025?", "expect": "abstain", "must": [], "now": "2026-11-07T09:00"}
+{"id": "a17", "q": "What does it mean if a lizard falls on the head?", "expect": "answer", "must": [["Brahmarandhra", "బ్రహ్మరంధ్ర", "fear of death", "మృత్యుభయ"]], "now": "2026-11-07T09:00", "note": "p89 lower table (recovered by column OCR) lists head positions"}
+{"id": "n05", "q": "హైదరాబాద్ బిర్యానీ ఎలా తయారు చేయాలి?", "expect": "abstain", "must": [], "now": "2026-11-07T09:00"}
+{"id": "n06", "q": "What is the price of gold today?", "expect": "abstain", "must": [], "now": "2026-11-07T09:00"}

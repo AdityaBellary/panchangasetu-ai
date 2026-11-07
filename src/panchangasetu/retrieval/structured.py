@@ -181,6 +181,7 @@ def _day_evidence(row: PanchangaDay, document: str, following: PanchangaDay | No
         "notes": row.notes,
         "sunrise": row.sunrise,
         "sunset": row.sunset,
+        "following": following.elements if following is not None else [],
     }
     return Evidence(
         id=str(row.id),

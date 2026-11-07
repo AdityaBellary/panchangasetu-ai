@@ -10,6 +10,7 @@ from pathlib import Path
 from sqlalchemy import func, select
 
 from panchangasetu.config import Settings, get_settings
+from panchangasetu.generation.answerer import Answer, AnswerService
 from panchangasetu.ingestion.pipeline import IngestionPipeline
 from panchangasetu.observability.logging import configure_logging
 from panchangasetu.providers.ocr.factory import build_ocr_engine
@@ -189,6 +190,60 @@ def cmd_retrieve(settings: Settings, args: argparse.Namespace) -> int:
     return 0
 
 
+def build_answer_service(settings: Settings) -> AnswerService:
+    from panchangasetu.providers.llm.factory import build_llm
+    from panchangasetu.providers.llm.openai_compatible import sarvam_chat
+
+    escalation = None
+    key = settings.sarvam_api_key.get_secret_value() if settings.sarvam_api_key else ""
+    if settings.escalation_model and key:
+        escalation = sarvam_chat(key, settings.escalation_model, timeout_s=max(settings.llm_timeout_s, 180))
+    return AnswerService(build_retriever(settings), build_llm(settings), escalation=escalation)
+
+
+def _print_answer(a: AnswerService | None, ans: Answer, verbose: bool) -> None:
+    print(ans.answer)
+    if ans.citations and not ans.abstained:
+        print("\nSources:")
+        for c in ans.citations:
+            pages = ", ".join(str(p) for p in c.pages[:3])
+            flag = {True: "", False: " (unverified)", None: ""}[c.verified]
+            print(
+                f"  - {c.document}"
+                + (f", p. {pages}" if pages else "")
+                + (f", {c.date}" if c.date else "")
+                + flag
+            )
+    if verbose:
+        cost = f", cost ₹{ans.cost_inr:.4f}" if ans.cost_inr else ""
+        print(
+            f"\n[{ans.method} | route {ans.route} | {ans.model or 'no LLM'}{cost} | "
+            f"{ans.latency_ms.get('total', 0):.0f} ms" + (f" | {ans.reason}" if ans.reason else "") + "]"
+        )
+
+
+def cmd_ask(settings: Settings, args: argparse.Namespace) -> int:
+    service = build_answer_service(settings)
+    for q in args.questions:
+        print(f"\n> {q}")
+        _print_answer(service, service.ask(q), args.verbose)
+    return 0
+
+
+def cmd_chat(settings: Settings, args: argparse.Namespace) -> int:
+    service = build_answer_service(settings)
+    print("PanchangaSetu chat. Ask in Telugu or English. Empty line or Ctrl-D to exit.")
+    while True:
+        try:
+            q = input("\n> ").strip()
+        except EOFError:
+            break
+        if not q:
+            break
+        _print_answer(service, service.ask(q), args.verbose)
+    return 0
+
+
 def cmd_db_upgrade(settings: Settings, _: argparse.Namespace) -> int:
     from alembic import command
     from alembic.config import Config
@@ -203,8 +258,10 @@ def cmd_ingest(settings: Settings, args: argparse.Namespace) -> int:
     if args.engine:
         settings = settings.model_copy(update={"ocr_engine": args.engine})
     pipeline = build_pipeline(settings)
+    if args.rederive:
+        print(f"re-derived text for {pipeline.rederive_from_payloads()} pages from stored OCR payloads")
     run_id, stats = pipeline.run(
-        trigger="cli", reprocess=args.reprocess, rechunk=args.rechunk, only=args.only
+        trigger="cli", reprocess=args.reprocess, rechunk=args.rechunk or args.rederive, only=args.only
     )
     # Structured facts (free, local) are refreshed after every ingest; up-to-date sources skip.
     structured = build_structured(settings).run(force=args.reprocess)
@@ -305,6 +362,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     ing.add_argument("--rechunk", action="store_true", help="re-classify and re-chunk from cached page text")
     ing.add_argument("--only", nargs="+", help="limit to these file names / relative paths")
+    ing.add_argument(
+        "--rederive",
+        action="store_true",
+        help="rebuild page text from stored OCR payloads first (free); implies --rechunk",
+    )
     ing.add_argument("--engine", choices=["sarvam", "tesseract"], help="override the default OCR engine")
     es = sub.add_parser(
         "extract-structured", help="(re)build panchanga_days / panchanga_events (free, local)"
@@ -320,6 +382,11 @@ def main(argv: list[str] | None = None) -> int:
     rt.add_argument("questions", nargs="+")
     rt.add_argument("-k", type=int, default=4, help="evidence items to show")
     rt.add_argument("--now", help="pretend the current local time is this ISO datetime")
+    ak = sub.add_parser("ask", help="answer one or more questions (grounded, with sources)")
+    ak.add_argument("questions", nargs="+")
+    ak.add_argument("-v", "--verbose", action="store_true", help="show method, route, model, cost, latency")
+    ch = sub.add_parser("chat", help="interactive question answering in the terminal")
+    ch.add_argument("-v", "--verbose", action="store_true")
     sub.add_parser("status", help="show ingestion status per document")
     sp = sub.add_parser("show-page", help="print the extracted text of one page")
     sp.add_argument("document")
@@ -335,6 +402,8 @@ def main(argv: list[str] | None = None) -> int:
         "index": cmd_index,
         "search": cmd_search,
         "retrieve": cmd_retrieve,
+        "ask": cmd_ask,
+        "chat": cmd_chat,
         "status": cmd_status,
         "show-page": cmd_show_page,
     }

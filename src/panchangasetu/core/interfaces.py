@@ -4,6 +4,7 @@ selected through settings, so swapping a vendor never touches pipeline code."""
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 from panchangasetu.core.types import OCRPage, PageImage
@@ -64,3 +65,40 @@ class SparseEncoder(Protocol):
     def encode_documents(self, texts: Sequence[str]) -> list[SparseVector]: ...
 
     def encode_query(self, text: str) -> SparseVector: ...
+
+
+@dataclass(frozen=True, slots=True)
+class ChatMessage:
+    role: str  # system | user | assistant
+    content: str
+
+
+@dataclass(frozen=True, slots=True)
+class LLMResult:
+    text: str
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+    latency_ms: float
+
+
+class LLMError(RuntimeError):
+    """A provider call failed. `retryable` = a later retry (or another provider) may succeed."""
+
+    def __init__(self, message: str, *, retryable: bool, quota: bool = False) -> None:
+        super().__init__(message)
+        self.retryable = retryable
+        self.quota = quota  # out of credits: needs billing action, fall back to another provider
+
+
+class LLM(Protocol):
+    name: str
+
+    def complete(
+        self,
+        messages: Sequence[ChatMessage],
+        *,
+        max_tokens: int = 600,
+        temperature: float = 0.1,
+        json: bool = False,
+    ) -> LLMResult: ...

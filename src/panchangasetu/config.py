@@ -91,6 +91,16 @@ class Settings(BaseSettings):
     router_min_confidence: float = Field(0.65, ge=0, le=1)
     query_glossary_path: Path = Path("config/query_glossary.yaml")
 
+    # --- answer generation ---
+    # Providers tried in order; out-of-credits or outages fall through to the next one.
+    llm_providers: list[Literal["sarvam", "openai"]] = ["sarvam", "openai"]
+    sarvam_chat_model: str = "sarvam-105b-conversations"  # no reasoning: fast, cheap (Phase 5 probe)
+    openai_chat_model: str = "gpt-4.1-mini"
+    # Tried once when the primary cannot produce a verified answer (hard list lookups, complex rules).
+    # "" disables escalation. sarvam-105b reasons: ~20 s and ~₹0.3 per escalated answer (Phase 5 probe).
+    escalation_model: str = ""  # off by default: on large prompts sarvam-105b needs >4k reasoning tokens
+    llm_timeout_s: float = Field(60.0, gt=0)
+
     # --- chunking ------------------------------------------------------------------------
     chunk_min_tokens: int = Field(30, ge=0)
     chunk_target_tokens: int = Field(350, ge=50)

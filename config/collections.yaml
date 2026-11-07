@@ -36,5 +36,8 @@ documents:
         collection: panchanga
         section_type: daily_panchangam_table
         ocr_engine: tesseract
+      # Two-column "position -> result" lists: OCR each column on its own so rows keep their pairs
+      # (whole-page OCR merged "ముక్కుమీద కార్యహాని | స్త్రీకి తొడమీద …" and misled the answer model).
+      - {pages: "89", columns: 2, ocr_engine: tesseract}
       - {pages: "152-163", collection: panchanga, section_type: ttd_festival_calendar}
       - {pages: "164-176", collection: panchanga, section_type: ttd_utsavam_schedules}

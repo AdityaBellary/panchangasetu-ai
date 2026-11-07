@@ -142,6 +142,22 @@ PLANETS: dict[str, list[str]] = {
 }
 
 
+RASIS: dict[str, list[str]] = {
+    "మేష": ["mesha", "mesham", "aries"],
+    "వృషభ": ["vrishabha", "vrushabha", "taurus"],
+    "మిథున": ["mithuna", "midhuna", "gemini"],
+    "కర్కాటక": ["karkataka", "kataka", "cancer", "కటక"],
+    "సింహ": ["simha", "simham", "leo"],
+    "కన్యా": ["kanya", "virgo", "కన్య"],
+    "తులా": ["tula", "thula", "libra", "తుల"],
+    "వృశ్చిక": ["vrischika", "vrushchika", "scorpio"],
+    "ధనుస్సు": ["dhanus", "dhanussu", "dhanu", "sagittarius", "ధనూ", "ధనుర్"],
+    "మకర": ["makara", "makaram", "capricorn"],
+    "కుంభ": ["kumbha", "kumbham", "aquarius"],
+    "మీన": ["meena", "meenam", "pisces"],
+}
+
+
 def english_name(table: dict[str, list[str]], canonical: str) -> str:
     """First Latin alias, title-cased (used for English answers)."""
     for alias in table.get(canonical, []):

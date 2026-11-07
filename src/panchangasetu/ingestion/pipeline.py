@@ -31,7 +31,7 @@ from panchangasetu.core.types import Collection, ExtractionMethod, OCRPage, Page
 from panchangasetu.ingestion.chunking import PageText, TeluguChunker, approx_token_counter
 from panchangasetu.ingestion.classification import CollectionRules, PagePlan, classify_page
 from panchangasetu.ingestion.discovery import DiscoveredFile, discover_pdfs
-from panchangasetu.ingestion.pdf_pages import PdfReader, inspect_page, render_upright
+from panchangasetu.ingestion.pdf_pages import PdfReader, inspect_page, render_columns, render_upright
 from panchangasetu.observability.logging import get_logger
 from panchangasetu.storage.db import session_scope
 from panchangasetu.storage.models import (
@@ -163,6 +163,33 @@ class IngestionPipeline:
                 log.info("ingest.run.done", run_id=str(run_id), status=status, **stats.as_dict())
         return run_id, stats
 
+    def rederive_from_payloads(self) -> int:
+        """Rebuild page text from stored raw OCR payloads (no OCR calls, no cost). Used when the
+        payload -> text conversion improves, e.g. a newly recognised layout tag."""
+        from panchangasetu.providers.ocr.sarvam import blocks_to_markdown
+
+        updated = 0
+        with session_scope(self.sessions) as s:
+            pages = s.scalars(
+                select(Page)
+                .join(DocumentVersion, DocumentVersion.id == Page.version_id)
+                .where(
+                    DocumentVersion.is_current.is_(True),
+                    Page.ocr_engine == "sarvam",
+                    Page.ocr_payload_key.is_not(None),
+                )
+            ).all()
+            for page in pages:
+                assert page.ocr_payload_key is not None
+                payload = json.loads(self.store.get(page.ocr_payload_key))
+                raw = blocks_to_markdown(payload["page"].get("blocks") or [])
+                if raw != page.raw_text:
+                    page.raw_text = raw
+                    page.text = normalize_telugu(raw)
+                    updated += 1
+        log.info("ingest.rederive.done", pages_updated=updated)
+        return updated
+
     # ------------------------------------------------------------------ concurrency
     @contextmanager
     def _exclusive(self) -> Iterator[None]:
@@ -287,8 +314,12 @@ class IngestionPipeline:
             self._engines[name] = self._engine_factory(name)
         return self._engines[name]
 
-    def _page_is_fresh(self, page: Page, planned_engine: str | None) -> bool:
+    def _page_is_fresh(
+        self, page: Page, planned_engine: str | None, planned_columns: int | None = None
+    ) -> bool:
         if page.extraction_version != self.settings.extraction_version or page.error or page.text is None:
+            return False
+        if (page.text_stats or {}).get("columns") != planned_columns:
             return False
         # If the rules now route this page to a different engine (or the page was last read by
         # the fallback after the primary failed), re-OCR it with the planned engine.
@@ -313,7 +344,9 @@ class IngestionPipeline:
                 for n, p in existing.items()
                 if not reprocess
                 and self._page_is_fresh(
-                    p, self.rules.plan(source_path, n).ocr_engine or self.settings.ocr_engine
+                    p,
+                    self.rules.plan(source_path, n).ocr_engine or self.settings.ocr_engine,
+                    self.rules.plan(source_path, n).columns,
                 )
             }
         log.info(
@@ -350,6 +383,12 @@ class IngestionPipeline:
                         self._store_text(page, info.text_layer, ExtractionMethod.TEXT_LAYER, engine=None)
                         stats.pages_text_layer += 1
                         continue
+                    if (
+                        plan.columns == 2
+                        and info.kind != PageKind.IMAGE_ONLY
+                        and self._ocr_columns(pdf_page, info, page, plan, sha, stats)
+                    ):
+                        continue
                     image = render_upright(
                         pdf_page,
                         info,
@@ -369,6 +408,41 @@ class IngestionPipeline:
             self._flush_batch(engine_name, pending, sha, stats)
 
         self._classify_and_chunk(version_id, source_path, stats)
+
+    def _ocr_columns(
+        self, pdf_page: Any, info: Any, page: Page, plan: PagePlan, sha: str, stats: RunStats
+    ) -> bool:
+        """OCR each column separately so two-column lists keep their pairs ("ముక్కుమీద → కార్యహాని").
+        Runs inline (one page); returns False to fall back to whole-page OCR."""
+        images = render_columns(pdf_page, info, dpi=self.settings.render_dpi)
+        if images is None:
+            log.warning("ingest.columns.no_gutter", page=info.page_number)
+            return False
+        engine_name: OCREngineName = plan.ocr_engine or self.settings.ocr_engine
+        try:
+            results = self._engine(engine_name).ocr(images)
+        except OCRError as exc:
+            log.warning("ingest.columns.ocr_failed", page=info.page_number, error=str(exc))
+            return False
+        if len(results) != len(images):
+            return False
+        texts = [r.text for r in results]
+        if len(texts) == 3:  # title band first: make it the section heading of the list below
+            title = " ".join(line.strip() for line in texts[0].splitlines() if line.strip())
+            texts[0] = f"## {title}" if title else ""
+        combined = OCRPage(
+            page_number=info.page_number,
+            text="\n\n".join(t for t in texts if t),
+            text_format=results[0].text_format,
+            engine=results[0].engine,
+            engine_version=results[0].engine_version + ":columns2+title",
+            confidence=min((r.confidence for r in results if r.confidence is not None), default=None),
+        )
+        self._store_text(page, combined.text, ExtractionMethod.OCR, engine=combined)
+        page.ocr_payload_key = None  # text now comes from column OCR, not the stored whole-page payload
+        page.text_stats = {**(page.text_stats or {}), "columns": 2}
+        stats.pages_ocr += 1
+        return True
 
     def _flush_batch(
         self, engine_name: OCREngineName, pending: list[_Pending], sha: str, stats: RunStats

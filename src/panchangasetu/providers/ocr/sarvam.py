@@ -18,6 +18,7 @@ the page (observed inventing dates). They are excluded from page text to protect
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable, Sequence
 from html.parser import HTMLParser
@@ -38,8 +39,23 @@ TERMINAL_OK = {"completed", "partially_completed"}
 TERMINAL_FAIL = {"failed", "rejected"}
 
 # Layout tags whose text is not reliable page content for retrieval.
-EXCLUDED_TAGS = frozenset({"image", "page-number", "page_number"})
-HEADING_TAGS = frozenset({"header", "title", "section-header", "section_header", "heading"})
+EXCLUDED_TAGS = frozenset({"image", "page-number", "page_number", "folio"})
+# Tags observed on the TTD corpus (2026-11-07): section-title (165 blocks), headline, header.
+HEADING_TAGS = frozenset(
+    {
+        "header",
+        "title",
+        "section-title",
+        "section_title",
+        "section-header",
+        "section_header",
+        "heading",
+        "headline",
+    }
+)
+# Model-written descriptions of pictures can appear under any tag ("This image contains no
+# discernible text", "ఈ చిత్రంలో మొసలి …"). They are not page text and must never be indexed.
+_GENERATED_DESCRIPTION = re.compile(r"^\s*(?:this|the)\s+(?:image|picture|page|figure)\b|^\s*ఈ\s*చిత్ర", re.I)
 
 
 def _status_code(exc: BaseException) -> int | None:
@@ -117,7 +133,7 @@ def blocks_to_markdown(blocks: list[dict[str, Any]]) -> str:
     for block in sorted(blocks, key=lambda b: b.get("reading_order") or 0):
         tag = (block.get("layout_tag") or "").lower()
         text = (block.get("text") or "").strip()
-        if not text or tag in EXCLUDED_TAGS:
+        if not text or tag in EXCLUDED_TAGS or _GENERATED_DESCRIPTION.match(text):
             continue
         if tag == "table" or text.lstrip().startswith("<table"):
             text = table_html_to_text(text)

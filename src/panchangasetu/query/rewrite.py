@@ -30,14 +30,18 @@ class Glossary:
         return cls({str(k).lower(): [str(v) for v in vals] for k, vals in raw.items()})
 
     def lookup(self, text: str) -> list[str]:
+        return [t for _, terms in self.lookup_pairs(text) for t in terms]
+
+    def lookup_pairs(self, text: str) -> list[tuple[str, list[str]]]:
+        """(english phrase, telugu terms) for every glossary phrase in the text, longest first."""
         low = text.lower()
-        hits: list[str] = []
+        pairs: list[tuple[str, list[str]]] = []
         # Longest phrases first so "shukla paksha" wins over "paksha".
         for phrase in sorted(self.entries, key=len, reverse=True):
             if re.search(rf"(?<![a-z]){re.escape(phrase)}s?(?![a-z])", low):
-                hits += self.entries[phrase]
+                pairs.append((phrase, self.entries[phrase]))
                 low = low.replace(phrase, " ")
-        return hits
+        return pairs
 
 
 def expand_query(text: str, language: Language, slots: Slots, glossary: Glossary) -> str:

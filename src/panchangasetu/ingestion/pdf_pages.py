@@ -148,3 +148,69 @@ class PdfReader:
         wanted = numbers if numbers is not None else range(1, self.page_count + 1)
         for n in wanted:
             yield self.doc[n - 1]
+
+
+def find_gutter(page: pymupdf.Page, *, search: tuple[float, float] = (0.35, 0.65)) -> float | None:
+    """x of the emptiest vertical band in the middle of the page, from exact glyph boxes in the
+    text layer (reliable even when the glyph *encoding* is a legacy font). None if no clear gutter."""
+    width = int(page.rect.width)
+    cover = [0] * (width + 1)
+    for block in page.get_text("dict")["blocks"]:
+        if block.get("type") != 0:
+            continue
+        for line in block["lines"]:
+            for span in line["spans"]:
+                if span["text"].strip():
+                    for x in range(max(0, int(span["bbox"][0])), min(width, int(span["bbox"][2]))):
+                        cover[x] += 1
+    lo, hi = int(width * search[0]), int(width * search[1])
+    x = min(range(lo, hi), key=lambda i: cover[i])
+    busiest = max(cover[lo:hi]) or 1
+    return float(x) if cover[x] <= 0.05 * busiest else None
+
+
+def _full_width_band_bottom(page: pymupdf.Page, gutter: float, *, within: float = 0.3) -> float:
+    """Bottom y of the title band: text-layer lines near the top that cross the gutter (a table
+    title spans both columns and would otherwise be cut in half)."""
+    limit = page.rect.height * within
+    bottom = 0.0
+    for block in page.get_text("dict")["blocks"]:
+        if block.get("type") != 0:
+            continue
+        for line in block["lines"]:
+            x0, y0, x1, y1 = line["bbox"]
+            if (
+                y0 < limit
+                and x0 < gutter - 5 < gutter + 5 < x1
+                and any(s["text"].strip() for s in line["spans"])
+            ):
+                bottom = max(bottom, y1)
+    return bottom
+
+
+def render_columns(page: pymupdf.Page, info: PageInfo, *, dpi: int) -> list[PageImage] | None:
+    """[title band (optional), left column, right column] images of an upright two-column page,
+    or None when there is no clear gutter."""
+    original = page.rotation
+    try:
+        if info.upright_rotation != original:
+            page.set_rotation(info.upright_rotation)
+        gutter = find_gutter(page)
+        if gutter is None:
+            return None
+        top = _full_width_band_bottom(page, gutter)
+        rects = [pymupdf.Rect(0, 0, page.rect.width, top + 2)] if top > 0 else []
+        rects += [
+            pymupdf.Rect(0, top, gutter, page.rect.height),
+            pymupdf.Rect(gutter, top, page.rect.width, page.rect.height),
+        ]
+        images = []
+        for rect in rects:
+            pix = page.get_pixmap(dpi=dpi, clip=rect, alpha=False, colorspace=pymupdf.csRGB)
+            images.append(
+                PageImage(info.page_number, pix.tobytes("png"), pix.width, pix.height, info.upright_rotation)
+            )
+        return images
+    finally:
+        if page.rotation != original:
+            page.set_rotation(original)
