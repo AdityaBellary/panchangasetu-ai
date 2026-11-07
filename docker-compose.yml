@@ -1,0 +1,20 @@
+# Local development stack. Qdrant, Redis, TEI, API and worker services are added in later phases.
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: psetu
+      POSTGRES_PASSWORD: psetu  # dev only; production uses a secrets manager
+      POSTGRES_DB: psetu
+    ports:
+      - "127.0.0.1:${PSETU_PG_PORT:-55432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U psetu -d psetu"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

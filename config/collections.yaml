@@ -1,0 +1,40 @@
+# Curator rules: which collection each page belongs to and which OCR engine reads it.
+# Pages without a rule are classified by the text heuristic in ingestion/classification.py.
+# Later entries override earlier ones; `defaults` applies to every page of a matching document.
+#
+# Collections:
+#   panchanga = dated facts (what happens WHEN): daily panchangam, festival dates, muhurthams,
+#               planetary transit dates, month start/end dates.
+#   general   = explanations, stotras, predictions, rules (WHAT / WHY / HOW), even when they use
+#               panchanga vocabulary heavily.
+# Section map below was derived from the first full OCR run (2026-11-07); see docs/phase-2-ingestion.md.
+
+documents:
+  - match: "TTD-Calendar-*.pdf"
+    defaults:
+      collection: panchanga
+      section_type: monthly_calendar
+      ocr_engine: sarvam
+
+  - match: "TTD_panchangam.pdf"   # Sri Parabhava nama samvatsara Siddhanti panchangam 2026-27
+    defaults:
+      collection: general
+      section_type: panchanga_vignanam   # pp. 51-99: muhurtha/vivaha/janana rules, vastu, etc.
+      ocr_engine: sarvam                 # best quality on prose and stotra pages
+    ranges:
+      - {pages: "1-3", collection: skip, section_type: cover}
+      - {pages: "4-9", section_type: stotras}
+      - {pages: "10-15, 17-18, 20-21", section_type: samvatsara_phalalu}
+      - {pages: "16", collection: panchanga, section_type: graha_rasi_pravesham}
+      - {pages: "19", collection: panchanga, section_type: karthelu}
+      - {pages: "22", collection: panchanga, section_type: masa_dates}
+      - {pages: "23-42", section_type: rasi_phalalu}
+      - {pages: "43-50", collection: panchanga, section_type: shubha_muhurthams}
+      # Day-by-day panchangam tables (rotated in the source). Sarvam's table parser drops most
+      # of each row here; Tesseract reads the lines nearly verbatim.
+      - pages: "97, 100-151"
+        collection: panchanga
+        section_type: daily_panchangam_table
+        ocr_engine: tesseract
+      - {pages: "152-163", collection: panchanga, section_type: ttd_festival_calendar}
+      - {pages: "164-176", collection: panchanga, section_type: ttd_utsavam_schedules}

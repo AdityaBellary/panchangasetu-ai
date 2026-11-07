@@ -1,0 +1,24 @@
+# Structured extraction: which pages of which documents hold dated panchanga facts, and how to
+# read them. Facts land in Postgres tables (panchanga_days, panchanga_events) and are what
+# date questions are answered from. See docs/phase-2b-structured-calendar.md.
+
+sources:
+  - match: "TTD_panchangam.pdf"   # Sri Parabhava nama samvatsara Siddhanti panchangam 2026-27
+    daily_table:
+      pages: "100-151"
+      first_date: 2026-03-19          # Ugadi, the first printed row (verified against the page)
+      initial_masa: ఫాల్గుణం           # the tithi at that sunrise is Phalguna Bahula Amavasya
+      initial_paksha: బహుళ
+    festival_table:
+      pages: "152-163"
+      start_after: 2026-03-15         # the table's first row is Monday 16 March 2026
+    utsavam_schedules:
+      pages: "164-176"
+
+  # Wall calendars: one month per page, image-only. Read cell by cell with free OCR; values are
+  # stored as UNVERIFIED (no ghatis / text layer to check times against). Where the book covers
+  # the same date, the book is authoritative and the calendar cell is cross-checked against it.
+  - match: "TTD-Calendar-2026.pdf"
+    wall_calendar: {year: 2026, first_month: 1}
+  - match: "TTD-Calendar-PDF-2027-*.pdf"
+    wall_calendar: {year: 2027, first_month: 1}
