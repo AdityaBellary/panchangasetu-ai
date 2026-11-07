@@ -12,6 +12,13 @@ from panchangasetu.telugu.text import graphemes
 
 COUNT = approx_token_counter(3.0)
 SENTENCE = "ఈ రాశివారికి గురుడు దశమ స్థానమందు సామాన్యఫలితములను ఇచ్చును."
+# Distinct per-page content: identical lines on many pages are (correctly) treated as running
+# headers, and digits are masked during that detection, so numbering pages is not enough.
+WORDS = ["మేష", "వృషభ", "మిథున", "కర్కాటక", "సింహ", "కన్యా", "తులా", "వృశ్చిక", "ధనుస్సు", "మకర"]
+
+
+def unique(i: int) -> str:
+    return f"{WORDS[i % len(WORDS)]}రాశి {WORDS[(i * 3 + 1) % len(WORDS)]} వారికి {SENTENCE}"
 
 
 def chunker(target: int = 60, maximum: int = 80, overlap: int = 0, minimum: int = 0) -> TeluguChunker:
@@ -29,10 +36,10 @@ def page(n: int, text: str, coll: Collection = Collection.GENERAL, section: str 
 
 
 def test_running_headers_are_detected_and_removed() -> None:
-    pages = [page(i, f"## {30 + i} శ్రీ పరాభవనామ సంవత్సర పంచాంగం\n\n{SENTENCE} {i}") for i in range(1, 6)]
+    pages = [page(i, f"## {30 + i} శ్రీ పరాభవనామ సంవత్సర పంచాంగం\n\n{unique(i)}") for i in range(1, 6)]
     assert "# శ్రీ పరాభవనామ సంవత్సర పంచాంగం" in find_boilerplate_lines(pages)
     chunks = chunker().chunk(pages)
-    assert all("పరాభవనామ" not in c.text for c in chunks)
+    assert chunks and all("పరాభవనామ" not in c.text for c in chunks)
     assert all(c.heading_path == [] for c in chunks)
 
 
@@ -97,7 +104,7 @@ def test_alternating_recto_verso_headers_are_stripped_but_table_data_survives() 
     for n in range(1, 21):
         header = f"తిరుమల తిరుపతి దేవస్థానములు {n}" if n % 2 == 0 else f"{n} శ్రీ పరాభవనామ సంవత్సర సిద్ధాన్త పంచాంగం"
         # "6-20" and "భో.3-34 అహః 29-55" recur on every page but are data, not boilerplate.
-        pages.append(page(n, f"{header}\n6-20\nభో.3-34 అహః 29-55\n{SENTENCE} {n}"))
+        pages.append(page(n, f"{header}\n6-20\nభో.3-34 అహః 29-55\n{unique(n)}"))
     text = "\n".join(c.text for c in chunker(target=2000, maximum=3000).chunk(pages))
     assert "దేవస్థానములు" not in text and "సిద్ధాన్త పంచాంగం" not in text
     assert text.count("6-20") == 20 and text.count("అహః 29-55") == 20
@@ -127,3 +134,25 @@ def test_overlap_never_pushes_a_chunk_past_max_tokens() -> None:
     units = [SENTENCE * 3 for _ in range(8)]  # each unit ~ 60 tokens
     chunks = chunker(target=70, maximum=80, overlap=1).chunk([page(1, "\n\n".join(units))])
     assert chunks and all(c.token_count <= 80 for c in chunks)
+
+
+def test_headings_expire_and_reset_on_section_change() -> None:
+    pages = [
+        page(66, f"## వివాహ ప్రకరణము\n\n{unique(1)}"),
+        page(67, unique(2)),
+        page(68, unique(3)),
+        page(69, unique(4)),  # more than 2 pages without a heading: expired
+        page(70, unique(5), Collection.PANCHANGA, "daily"),
+    ]
+    chunks = chunker(target=20, maximum=60).chunk(pages)
+    by_page = {c.page_start: c.heading_path for c in chunks}
+    assert by_page[66] == ["వివాహ ప్రకరణము"] and by_page[68] == ["వివాహ ప్రకరణము"]
+    assert by_page[69] == [] and by_page[70] == []
+
+
+def test_running_header_spelling_variant_is_stripped() -> None:
+    header = "శ్రీ పరాభవనామ సంవత్సర సిద్ధాన్త పంచాంగం"
+    pages = [page(i, f"{i} {header}\n\n{unique(i)}") for i in range(1, 8)]
+    pages.append(page(8, f"## 8 శ్రీ పరాభవనామ సంవత్సర సిద్ధాంత పంచాంగం\n\n{unique(8)}"))  # variant
+    chunks = chunker(target=2000, maximum=3000).chunk(pages)
+    assert chunks and all("పంచాంగం" not in c.text and c.heading_path == [] for c in chunks)

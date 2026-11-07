@@ -40,3 +40,27 @@ class ObjectStore(Protocol):
     def exists(self, key: str) -> bool: ...
 
     def delete(self, key: str) -> None: ...
+
+
+class Embedder(Protocol):
+    """Dense text embedder. Query and document encodings may differ (e.g. e5 prefixes)."""
+
+    name: str
+    dim: int
+
+    def embed_documents(self, texts: Sequence[str]) -> list[list[float]]: ...
+
+    def embed_query(self, text: str) -> list[float]: ...
+
+
+SparseVector = tuple[list[int], list[float]]  # (indices, values)
+
+
+class SparseEncoder(Protocol):
+    """Lexical (keyword) encoder producing sparse vectors for hybrid search."""
+
+    name: str
+
+    def encode_documents(self, texts: Sequence[str]) -> list[SparseVector]: ...
+
+    def encode_query(self, text: str) -> SparseVector: ...

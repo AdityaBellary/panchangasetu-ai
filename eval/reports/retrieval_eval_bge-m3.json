@@ -1,0 +1,172 @@
+{
+  "embedding_model": "BAAI/bge-m3",
+  "chunker_version": "chunk-3",
+  "all:mrr@10": 0.749,
+  "all:recall@5": 0.859,
+  "en:mrr@10": 0.599,
+  "en:recall@5": 0.75,
+  "general:mrr@10": 0.752,
+  "general:recall@5": 0.84,
+  "panchanga:mrr@10": 0.738,
+  "panchanga:recall@5": 0.929,
+  "te:mrr@10": 0.898,
+  "te:recall@5": 0.969,
+  "latency_ms_p50": 19.3,
+  "latency_ms_p95": 28.2,
+  "negative_top1_scores": [
+    0.377,
+    0.307,
+    0.381,
+    0.353,
+    0.409,
+    0.404,
+    1.0,
+    0.543,
+    0.553,
+    0.833,
+    0.431,
+    0.45
+  ],
+  "misses": [
+    {
+      "id": "g01",
+      "lang": "en",
+      "query": "What are the yearly predictions for Kanya rasi in Parabhava year?",
+      "gold": [
+        31,
+        32
+      ],
+      "top_pages": [
+        18,
+        21,
+        14,
+        11,
+        13
+      ]
+    },
+    {
+      "id": "g04",
+      "lang": "en",
+      "query": "How will this year be for Meena rasi (Pisces)?",
+      "gold": [
+        41,
+        42
+      ],
+      "top_pages": [
+        34,
+        38,
+        36,
+        56,
+        35
+      ]
+    },
+    {
+      "id": "g05",
+      "lang": "te",
+      "query": "మేషరాశి ఫలితాలు 2026-27",
+      "gold": [
+        23,
+        24
+      ],
+      "top_pages": [
+        29,
+        28,
+        34,
+        68,
+        28
+      ]
+    },
+    {
+      "id": "g06",
+      "lang": "en",
+      "query": "What is Kuja dosha and when is it cancelled for marriage?",
+      "gold": [
+        73,
+        74
+      ],
+      "top_pages": [
+        52,
+        67,
+        80,
+        66,
+        66
+      ]
+    },
+    {
+      "id": "g11",
+      "lang": "en",
+      "query": "In what order should tarpanam be offered to ancestors?",
+      "gold": [
+        86
+      ],
+      "top_pages": [
+        61,
+        52,
+        79,
+        85,
+        52
+      ]
+    },
+    {
+      "id": "g12",
+      "lang": "en",
+      "query": "How is Rahu kalam calculated for each weekday?",
+      "gold": [
+        83,
+        84
+      ],
+      "top_pages": [
+        96,
+        94,
+        80,
+        38,
+        39
+      ]
+    },
+    {
+      "id": "g21",
+      "lang": "en",
+      "query": "Gochara phalam: results of planetary transits from the moon sign",
+      "gold": [
+        96
+      ],
+      "top_pages": [
+        38,
+        36,
+        28,
+        32,
+        33
+      ]
+    },
+    {
+      "id": "g23",
+      "lang": "en",
+      "query": "What are Shukla paksha and Krishna paksha?",
+      "gold": [
+        55
+      ],
+      "top_pages": [
+        74,
+        91,
+        59,
+        98,
+        83
+      ]
+    },
+    {
+      "id": "p04",
+      "lang": "en",
+      "query": "When is Vaikuntha Ekadasi?",
+      "gold": [
+        161
+      ],
+      "top_pages": [
+        162,
+        157,
+        159,
+        176,
+        171
+      ]
+    }
+  ]
+}

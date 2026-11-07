@@ -29,6 +29,8 @@ from panchangasetu.telugu.text import graphemes, split_sentences
 TokenCounter = Callable[[str], int]
 
 _DIGITS_RE = regex.compile(r"\d+")
+# A heading stays in force for its own page and at most this many following pages.
+_HEADING_TTL_PAGES = 2
 _HEADING_PREFIX = "## "
 
 
@@ -79,10 +81,42 @@ def find_boilerplate_lines(
     return {k for k, n in seen.items() if n >= threshold}
 
 
+def _letters_key(line: str) -> str:
+    return "".join(_LETTER_RE.findall(line))
+
+
+def _edit_distance_capped(a: str, b: str, cap: int) -> int:
+    if abs(len(a) - len(b)) > cap:
+        return cap + 1
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        if min(cur) > cap:
+            return cap + 1
+        prev = cur
+    return prev[-1]
+
+
+def is_boilerplate(line: str, boilerplate: set[str], letter_keys: list[str] | None = None) -> bool:
+    """Exact (digits masked) match, or a near-miss spelling of a running header: OCR and the
+    typesetter vary it ("సిద్ధాంత" vs "సిద్ధాన్త"), and the rare variant never reaches the
+    frequency threshold on its own."""
+    if _boilerplate_key(line) in boilerplate:
+        return True
+    letters = _letters_key(line)
+    if len(letters) < _MIN_BOILERPLATE_LETTERS:
+        return False
+    keys = letter_keys if letter_keys is not None else [_letters_key(k) for k in boilerplate]
+    return any(_edit_distance_capped(letters, k, 2) <= 2 for k in keys)
+
+
 def strip_boilerplate(text: str, boilerplate: set[str]) -> str:
     if not boilerplate:
         return text
-    return "\n".join(line for line in text.splitlines() if _boilerplate_key(line) not in boilerplate)
+    keys = [_letters_key(k) for k in boilerplate]
+    return "\n".join(line for line in text.splitlines() if not is_boilerplate(line, boilerplate, keys))
 
 
 def _is_table_like(block: str) -> bool:
@@ -164,6 +198,8 @@ class TeluguChunker:
         chunks: list[Chunk] = []
         current: _Open | None = None
         headings: list[str] = []
+        heading_page = 0
+        last_section: tuple[Collection, str] | None = None
 
         def flush(carry_overlap: bool) -> None:
             nonlocal current
@@ -202,6 +238,12 @@ class TeluguChunker:
                 flush(carry_overlap=False)
                 continue
             text = strip_boilerplate(page.text, boilerplate)
+            # Headings describe the section they open. They must not leak across a curated
+            # section change, nor live on through pages that carry no headings of their own.
+            section = (page.collection, page.section_type)
+            if section != last_section or page.page_number - heading_page > _HEADING_TTL_PAGES:
+                headings = []
+            last_section = section
             for raw_block in regex.split(r"\n\s*\n", text):
                 block = raw_block.strip()
                 if not block:
@@ -212,6 +254,7 @@ class TeluguChunker:
                     if titled:  # "## 156" (a page number tagged as header) is not a heading
                         flush(carry_overlap=False)
                         headings = titled[-2:]
+                        heading_page = page.page_number
                     continue
                 if current is not None and (
                     current.collection != page.collection or current.section_type != page.section_type

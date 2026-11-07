@@ -234,3 +234,23 @@ class PanchangaEvent(Base):
     raw: Mapped[str] = mapped_column(Text)
     extractor_version: Mapped[str] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class IndexBuild(Base):
+    """One build of a vector-index collection. Postgres stays the source of truth; Qdrant
+    collections are derived and can be rebuilt from `chunks` / `panchanga_*` at any time."""
+
+    __tablename__ = "index_builds"
+    __table_args__ = (Index("ix_index_builds_alias", "alias", "status"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    alias: Mapped[str] = mapped_column(String(128))  # logical name served to queries
+    physical_name: Mapped[str] = mapped_column(String(256), unique=True)
+    embed_model: Mapped[str] = mapped_column(String(128))
+    sparse_model: Mapped[str] = mapped_column(String(64))
+    chunker_version: Mapped[str] = mapped_column(String(64))
+    fingerprint: Mapped[str] = mapped_column(String(64))  # hash of docs + models + render settings
+    doc_count: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(16))  # building | active | retired | failed
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

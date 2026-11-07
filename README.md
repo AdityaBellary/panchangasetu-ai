@@ -4,8 +4,8 @@ Telugu document intelligence and grounded RAG platform. It answers Telugu and En
 about TTD panchangam and calendar PDFs, with citations, and abstains when the documents
 don't support an answer.
 
-Status: Phase 2b (structured calendar facts) complete. See `docs/phase-1-architecture.md`,
-`docs/phase-2-ingestion.md` and `docs/phase-2b-structured-calendar.md`.
+Status: Phase 3 (vector search) complete. See `docs/phase-1-architecture.md` through
+`docs/phase-3-retrieval.md`.
 
 ## Quick start (local)
 
@@ -14,7 +14,7 @@ Prerequisites: Python 3.12, [uv](https://docs.astral.sh/uv/), Docker, Tesseract 
 ```bash
 uv sync
 cp .env.example .env        # then set SARVAM_API_KEY
-docker compose up -d postgres
+docker compose up -d postgres qdrant
 uv run psetu db-upgrade
 ```
 
@@ -32,6 +32,8 @@ uv run psetu ingest           # incremental: only new/changed files are processe
 uv run psetu status
 uv run psetu show-page TTD_panchangam.pdf 31
 uv run psetu extract-structured   # panchanga_days / panchanga_events (also run by ingest)
+uv run psetu index                # build/refresh the Qdrant index (local e5 embeddings)
+uv run psetu search general "కుజదోషం అంటే ఏమిటి?"
 ```
 
 ## Tests

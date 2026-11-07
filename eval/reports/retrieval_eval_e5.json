@@ -1,0 +1,109 @@
+{
+  "embedding_model": "intfloat/multilingual-e5-large",
+  "chunker_version": "chunk-3",
+  "all:mrr@10": 0.744,
+  "all:recall@5": 0.922,
+  "en:mrr@10": 0.647,
+  "en:recall@5": 0.875,
+  "general:mrr@10": 0.702,
+  "general:recall@5": 0.9,
+  "panchanga:mrr@10": 0.893,
+  "panchanga:recall@5": 1.0,
+  "te:mrr@10": 0.84,
+  "te:recall@5": 0.969,
+  "latency_ms_p50": 20.3,
+  "latency_ms_p95": 24.3,
+  "negative_top1_scores": [
+    0.741,
+    0.73,
+    0.738,
+    0.756,
+    0.769,
+    0.766,
+    1.0,
+    0.5,
+    0.553,
+    0.5,
+    0.783,
+    0.8
+  ],
+  "misses": [
+    {
+      "id": "g01",
+      "lang": "en",
+      "query": "What are the yearly predictions for Kanya rasi in Parabhava year?",
+      "gold": [
+        31,
+        32
+      ],
+      "top_pages": [
+        18,
+        10,
+        11,
+        17,
+        14
+      ]
+    },
+    {
+      "id": "g05",
+      "lang": "te",
+      "query": "మేషరాశి ఫలితాలు 2026-27",
+      "gold": [
+        23,
+        24
+      ],
+      "top_pages": [
+        32,
+        28,
+        36,
+        68,
+        13
+      ]
+    },
+    {
+      "id": "g09",
+      "lang": "en",
+      "query": "What does it mean if a lizard falls on the head?",
+      "gold": [
+        89
+      ],
+      "top_pages": [
+        36,
+        95,
+        34,
+        36,
+        23
+      ]
+    },
+    {
+      "id": "g11",
+      "lang": "en",
+      "query": "In what order should tarpanam be offered to ancestors?",
+      "gold": [
+        86
+      ],
+      "top_pages": [
+        52,
+        52,
+        85,
+        93,
+        95
+      ]
+    },
+    {
+      "id": "g23",
+      "lang": "en",
+      "query": "What are Shukla paksha and Krishna paksha?",
+      "gold": [
+        55
+      ],
+      "top_pages": [
+        61,
+        92,
+        90,
+        60,
+        99
+      ]
+    }
+  ]
+}

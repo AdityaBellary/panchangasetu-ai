@@ -14,6 +14,7 @@ from panchangasetu.ingestion.pipeline import IngestionPipeline
 from panchangasetu.observability.logging import configure_logging
 from panchangasetu.providers.ocr.factory import build_ocr_engine
 from panchangasetu.providers.ocr.tesseract import TesseractOCREngine
+from panchangasetu.retrieval.vector_store import VectorIndex, describe
 from panchangasetu.storage.db import make_engine, make_session_factory
 from panchangasetu.storage.models import ChunkRecord, Document, DocumentVersion, Page
 from panchangasetu.storage.object_store import LocalObjectStore
@@ -80,6 +81,61 @@ def cmd_extract_structured(settings: Settings, args: argparse.Namespace) -> int:
             indent=2,
         )
     )
+    return 0
+
+
+def build_vector_index(settings: Settings) -> VectorIndex:
+    from qdrant_client import QdrantClient
+
+    from panchangasetu.providers.embeddings.factory import build_embedder
+    from panchangasetu.providers.embeddings.telugu_sparse import TeluguSparseEncoder
+
+    key = settings.qdrant_api_key.get_secret_value() if settings.qdrant_api_key else None
+    return VectorIndex(
+        QdrantClient(url=settings.qdrant_url, api_key=key),
+        make_session_factory(make_engine(settings.database_url)),
+        build_embedder(settings),
+        TeluguSparseEncoder(),
+        prefix=settings.index_prefix,
+        keep_previous=settings.keep_previous_index_builds,
+    )
+
+
+def cmd_index(settings: Settings, args: argparse.Namespace) -> int:
+    index = build_vector_index(settings)
+    report = index.build(
+        chunker_version=settings.chunker_version, gloss=settings.index_section_gloss, force=args.force
+    )
+    print(
+        json.dumps(
+            {
+                "built": report.built,
+                "skipped": report.skipped,
+                "retired": report.retired,
+                "collections": describe(index),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return 0
+
+
+def cmd_search(settings: Settings, args: argparse.Namespace) -> int:
+    index = build_vector_index(settings)
+    hits = index.search(
+        args.collection,
+        args.query,
+        top_k=args.k,
+        candidates=settings.retrieval_candidates,
+        hybrid_min_telugu_ratio=settings.hybrid_min_telugu_ratio,
+    )
+    for h in hits:
+        p = h.payload or {}
+        where = f"{p.get('document')} p{p.get('page_start')}" + (f" {p.get('date')}" if p.get("date") else "")
+        tag = f"[{p.get('kind')}/{p.get('section_type')}]"
+        print(f"{h.score:.3f}  {tag} {where}")
+        print(f"       {str(p.get('text'))[:160]!r}")
     return 0
 
 
@@ -204,6 +260,12 @@ def main(argv: list[str] | None = None) -> int:
         "extract-structured", help="(re)build panchanga_days / panchanga_events (free, local)"
     )
     es.add_argument("--force", action="store_true", help="re-extract even if up to date")
+    ix = sub.add_parser("index", help="build/refresh the vector index (alias swap, zero downtime)")
+    ix.add_argument("--force", action="store_true", help="rebuild even if the corpus is unchanged")
+    se = sub.add_parser("search", help="debug retrieval against the vector index")
+    se.add_argument("collection", choices=["general", "panchanga"])
+    se.add_argument("query")
+    se.add_argument("-k", type=int, default=5)
     sub.add_parser("status", help="show ingestion status per document")
     sp = sub.add_parser("show-page", help="print the extracted text of one page")
     sp.add_argument("document")
@@ -216,6 +278,8 @@ def main(argv: list[str] | None = None) -> int:
         "db-upgrade": cmd_db_upgrade,
         "ingest": cmd_ingest,
         "extract-structured": cmd_extract_structured,
+        "index": cmd_index,
+        "search": cmd_search,
         "status": cmd_status,
         "show-page": cmd_show_page,
     }

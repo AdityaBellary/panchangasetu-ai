@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     ocr_batch_pages: int = Field(10, ge=1, le=20)
 
     sarvam_api_key: SecretStr | None = Field(default=None, validation_alias="SARVAM_API_KEY")
+    openai_api_key: SecretStr | None = Field(default=None, validation_alias="OPENAI_API_KEY")
     sarvam_doc_language: str = "te-IN"
     sarvam_doc_content_type: Literal["printed", "handwritten", "mixed"] = "printed"
     sarvam_poll_interval_s: float = Field(3.0, gt=0)
@@ -69,6 +70,23 @@ class Settings(BaseSettings):
     structured_row_langs: str = "tel"
     structured_ocr_workers: int = Field(6, ge=1, le=32)
 
+    # --- vector index & retrieval ---
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: SecretStr | None = None
+    index_prefix: str = "psetu"
+    embedding_provider: Literal["fastembed", "openai"] = "fastembed"
+    # Chosen by the Phase 3 bake-off (docs/phase-3-retrieval.md): best cross-lingual recall.
+    embedding_model: str = "intfloat/multilingual-e5-large"
+    openai_embedding_dimensions: int | None = None
+    model_cache_dir: Path = Path("data/models")
+    index_section_gloss: bool = True
+    retrieval_top_k: int = Field(8, ge=1, le=50)
+    retrieval_candidates: int = Field(30, ge=5, le=200)
+    # Lexical (Telugu sparse) fusion only for queries that are mostly Telugu script; the
+    # bake-off showed it degrades English queries (docs/phase-3-retrieval.md).
+    hybrid_min_telugu_ratio: float = Field(0.5, ge=0, le=1)
+    keep_previous_index_builds: int = Field(1, ge=0)
+
     # --- chunking ------------------------------------------------------------------------
     chunk_min_tokens: int = Field(30, ge=0)
     chunk_target_tokens: int = Field(350, ge=50)
@@ -80,7 +98,7 @@ class Settings(BaseSettings):
     # Bump these when the corresponding logic changes; the pipeline uses them to decide
     # what to recompute (OCR is the expensive step and is only redone on extraction bumps).
     extraction_version: str = "ext-1"
-    chunker_version: str = "chunk-2"
+    chunker_version: str = "chunk-3"
 
 
 @lru_cache(maxsize=1)
