@@ -22,7 +22,7 @@ from panchangasetu.generation.prompts import ABSTAIN_EN, ABSTAIN_TE, build_messa
 from panchangasetu.generation.templates import (
     can_template,
     can_template_occurrences,
-    render_day_answer,
+    render_day_answers,
     render_occurrence_answer,
 )
 from panchangasetu.generation.verify import check_answer, check_quotes, strip_citation_markers
@@ -156,8 +156,8 @@ class AnswerService:
 
         attrs = [a for a in r.route.slots.attributes if a]
         if r.route.mode == PanchangaMode.DAY and not r.route.wants_general and can_template(evidence, attrs):
-            days = [e for e in evidence if e.kind == "day"]
-            text = "\n\n".join(render_day_answer(e, attrs, lang) for e in days)
+            days = [e for e in evidence if e.kind in ("day", "weekday_period")]
+            text = render_day_answers(evidence, attrs, lang)
             return self._done(
                 base,
                 timings,

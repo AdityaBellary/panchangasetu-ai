@@ -22,6 +22,7 @@ from panchangasetu.storage.db import make_engine, make_session_factory
 from panchangasetu.storage.models import ChunkRecord, Document, DocumentVersion, Page
 from panchangasetu.storage.object_store import LocalObjectStore
 from panchangasetu.structured.service import StructuredExtractor
+from panchangasetu.structured.weekday_periods import WeekdayPeriods
 
 
 def build_pipeline(settings: Settings) -> IngestionPipeline:
@@ -159,6 +160,7 @@ def build_retriever(settings: Settings) -> Retriever:
         top_k=settings.retrieval_top_k,
         candidates=settings.retrieval_candidates,
         hybrid_min_telugu_ratio=settings.hybrid_min_telugu_ratio,
+        weekday_periods=WeekdayPeriods.load(settings.weekday_periods_path),
     )
 
 

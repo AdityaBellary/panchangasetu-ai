@@ -23,7 +23,17 @@ ATTRIBUTES: dict[str, list[str]] = {
     "durmuhurtam": ["durmuhurtam", "durmuhurtham", "dur muhurtham", "దుర్ముహూర్తం"],
     "amrutham": ["amrutha kalam", "amrita kalam", "amritakalam", "amrutham", "అమృతకాలం", "అమృత కాలం", "అమృతం"],
     "rahukalam": ["rahu kalam", "rahukalam", "rahu kaal", "rahukaal", "rahu kalamu", "రాహుకాలం", "రాహు కాలం"],
-    "yamagandam": ["yamagandam", "yama gandam", "యమగండం"],
+    "yamagandam": [
+        "yamagandam",
+        "yama gandam",
+        "yamaganda",
+        "yamakantakam",
+        "యమగండం",
+        "యమగండము",
+        "యమకంటకం",
+        "యమకంటక",
+    ],
+    "gulika": ["gulika kalam", "gulikai", "gulika", "kuligai", "గుళిక కాలం", "గుళికకాలం", "గుళిక"],
     "sunrise": ["sunrise", "sun rise", "సూర్యోదయం"],
     "sunset": ["sunset", "sun set", "సూర్యాస్తమయం"],
     "festival": [
@@ -81,7 +91,7 @@ _STOPWORDS = frozenset(
 )
 DAY_ATTRIBUTES = frozenset(
     {"tithi", "nakshatra", "yoga", "karana", "masa", "paksha", "varjyam", "durmuhurtam", "amrutham",
-     "rahukalam", "yamagandam", "sunrise", "sunset", "panchangam"}
+     "rahukalam", "yamagandam", "gulika", "sunrise", "sunset", "panchangam"}
 )  # fmt: skip
 
 WHEN_MARKERS = [

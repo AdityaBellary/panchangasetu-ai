@@ -15,6 +15,10 @@ TEMPLATE_ATTRIBUTES = frozenset(
     {"tithi", "nakshatra", "yoga", "karana", "varjyam", "durmuhurtam", "amrutham", "sunrise", "sunset",
      "masa", "paksha", "panchangam"}
 )  # fmt: skip
+# Fixed by weekday; answered from the book's weekday table (structured/weekday_periods.py).
+PERIOD_ATTRIBUTES = frozenset({"rahukalam", "yamagandam", "gulika"})
+_PERIOD_TE = {"rahukalam": "రాహుకాలం", "yamagandam": "యమగండం", "gulika": "గుళిక కాలం"}
+_PERIOD_EN = {"rahukalam": "Rahukalam", "yamagandam": "Yamagandam", "gulika": "Gulika kalam"}
 _TABLES = {"tithi": TITHIS, "nakshatra": NAKSHATRAS, "yoga": YOGAS, "karana": KARANAS}
 _LABEL_TE = {
     "tithi": "తిథి",
@@ -64,13 +68,53 @@ def _en_name(kind: str, telugu: str) -> str:
 
 
 def can_template(evidence: list[Evidence], attributes: list[str]) -> bool:
+    wanted = set(attributes)
+    periods = wanted & PERIOD_ATTRIBUTES
+    rest = wanted - PERIOD_ATTRIBUTES
+    if not wanted or not rest <= TEMPLATE_ATTRIBUTES:
+        return False
     days = [e for e in evidence if e.kind == "day"]
-    return (
-        bool(days)
-        and all(e.verified for e in days)
-        and bool(attributes)
-        and set(attributes) <= TEMPLATE_ATTRIBUTES
-    )
+    if rest and not (days and all(e.verified for e in days)):
+        return False
+    found = {e.data.get("period") for e in evidence if e.kind == "weekday_period"}
+    return periods <= found
+
+
+def _head(d: date, lang: str) -> str:
+    if lang == "te":
+        return f"{d.day} {_MONTHS_TE[d.month - 1]} {d.year} ({_WEEKDAY_TE[d.weekday()]})"
+    return d.strftime("%A, %d %B %Y")
+
+
+def render_day_answers(evidence: list[Evidence], attributes: list[str], lang: str) -> str:
+    """Day facts plus weekday-table periods (rahukalam, yamagandam, gulika), one block per date."""
+    days: dict[str | None, Evidence] = {e.date: e for e in evidence if e.kind == "day"}
+    periods = sorted((e for e in evidence if e.kind == "weekday_period"), key=lambda e: str(e.data["start"]))
+    day_attrs = [a for a in attributes if a not in PERIOD_ATTRIBUTES]
+    dates = sorted({d for d in days if d and day_attrs} | {p.date for p in periods if p.date})
+    blocks = []
+    for iso in dates:
+        d = date.fromisoformat(iso or "")
+        ev = days.get(iso)
+        block = render_day_answer(ev, day_attrs, lang) if ev is not None and day_attrs else _head(d, lang)
+        for p in periods:
+            if p.date == iso:
+                start, end = f"{iso}T{p.data['start']}", f"{iso}T{p.data['end']}"
+                kind = str(p.data["period"])
+                if lang == "te":
+                    block += f"\n{_PERIOD_TE[kind]}: {_te_time(start, d)} నుండి {_te_time(end, d)} వరకు."
+                else:
+                    block += f"\n{_PERIOD_EN[kind]}: {_en_time(start, d)} to {_en_time(end, d)}."
+        blocks.append(block)
+    if periods:
+        page = periods[0].pages[0] if periods[0].pages else ""
+        blocks.append(
+            f"(పుస్తకంలోని వారపు పట్టిక, పుట {page}: ఉదయం 6 గంటల నుండి లెక్కించినవి; సూర్యోదయ, సూర్యాస్తమయాలను బట్టి కొద్దిగా మారుతాయి.)"
+            if lang == "te"
+            else f"(From the book's weekday table, p. {page}: counted from 6 AM; the book notes they "
+            "shift slightly with the actual sunrise and sunset.)"
+        )
+    return "\n\n".join(blocks)
 
 
 def render_day_answer(ev: Evidence, attributes: list[str], lang: str) -> str:
@@ -143,12 +187,7 @@ def render_day_answer(ev: Evidence, attributes: list[str], lang: str) -> str:
             if lang == "te"
             else f"Sunrise {sr} AM, sunset {ss} PM (as printed)."
         )
-    head = (
-        f"{d.day} {_MONTHS_TE[d.month - 1]} {d.year} ({_WEEKDAY_TE[d.weekday()]})"
-        if lang == "te"
-        else d.strftime("%A, %d %B %Y")
-    )
-    return f"{head}\n" + "\n".join(lines)
+    return f"{_head(d, lang)}\n" + "\n".join(lines)
 
 
 def can_template_occurrences(evidence: list[Evidence]) -> bool:

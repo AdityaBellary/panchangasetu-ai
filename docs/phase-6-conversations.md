@@ -78,9 +78,10 @@ Follow-ups such as "and Tula?" exposed retrieval gaps the single-turn eval had m
 - "According to [S1], …" left a dangling "According to," after citation markers were stripped. Fixed.
 
 ## 5. Outstanding
-1. **Rahukalam/yamagandam on a date:** the weekday table (p.83–84) has three side-by-side column groups that the
-   fast model sometimes misreads or refuses. Both depend only on the weekday, so a small template from that
-   table would make them exact and free. **Recommended next fix.**
+1. ~~Rahukalam/yamagandam on a date~~ **Done (follow-up fix):** rahukalam, yamagandam and gulika are now
+   answered from the book's weekday table (p. 83, transcribed to `config/weekday_periods.yaml` and checked
+   against the page image) by template: exact, free, ~5 ms, Telugu and English, with the book's note that the
+   periods are counted from 6 AM and shift with sunrise/sunset. No LLM is involved.
 2. **Run-to-run variance of the fast model** on long prose: the same question can be answered in one run and
    refused in the next (Kuja dosha "when is it not a problem"). Benchmarking `gpt-4.1-mini` (needs OpenAI
    credits) or self-consistency would address this.

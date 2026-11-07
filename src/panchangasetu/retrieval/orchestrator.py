@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from qdrant_client import models
 
@@ -23,10 +23,11 @@ from panchangasetu.query.router import PanchangaMode, QueryRouter, Route
 from panchangasetu.retrieval.evidence import Evidence
 from panchangasetu.retrieval.structured import StructuredRetriever
 from panchangasetu.retrieval.vector_store import VectorIndex
+from panchangasetu.structured.weekday_periods import WeekdayPeriods
 
 # Day attributes the book's daily table does not print; their rules live in General text.
-_NOT_IN_DAILY_TABLE = {"rahukalam", "yamagandam"}
-_ATTRIBUTE_TE = {"rahukalam": "రాహుకాలము రాహుకాలః", "yamagandam": "యమగండము"}
+_NOT_IN_DAILY_TABLE = {"rahukalam", "yamagandam", "gulika"}
+_ATTRIBUTE_TE = {"rahukalam": "రాహుకాలము రాహుకాలః", "yamagandam": "యమగండము యమకంటక", "gulika": "గుళిక కాలము"}
 _WEEKDAY_TE = ("సోమవారము", "మంగళవారము", "బుధవారము", "గురువారము", "శుక్రవారము", "శనివారము", "ఆదివారము")
 
 
@@ -52,6 +53,7 @@ class Retriever:
         top_k: int = 6,
         candidates: int = 30,
         hybrid_min_telugu_ratio: float = 0.5,
+        weekday_periods: WeekdayPeriods | None = None,
     ) -> None:
         self.router = router
         self.vectors = vectors
@@ -61,6 +63,7 @@ class Retriever:
         self.top_k = top_k
         self.candidates = candidates
         self.hybrid_min_telugu_ratio = hybrid_min_telugu_ratio
+        self.weekday_periods = weekday_periods
 
     def retrieve(
         self, question: str, *, now: datetime | None = None, language: Language | None = None
@@ -79,6 +82,14 @@ class Retriever:
         t2 = time.perf_counter()
         attrs = set(route.slots.attributes)
         missing = attrs & _NOT_IN_DAILY_TABLE
+        tabled = missing & (self.weekday_periods.kinds if self.weekday_periods else frozenset())
+        if route.mode == PanchangaMode.DAY and tabled and self.weekday_periods is not None:
+            # Fixed by weekday: answered from the book's printed weekday table, not by searching.
+            for spec in route.dates:
+                for n in range(min((spec.end - spec.start).days + 1, 7)):
+                    day = spec.start + timedelta(days=n)
+                    result.evidence += [self.weekday_periods.evidence(k, day) for k in sorted(tabled)]
+            missing = missing - tabled
         if route.mode == PanchangaMode.DAY and missing:
             # The daily table does not print these; their weekday rules live in General text.
             # Search for the rule itself, not the whole question (dates would only add noise).

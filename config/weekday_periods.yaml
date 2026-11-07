@@ -1,0 +1,33 @@
+# Inauspicious periods fixed by weekday, from the TTD Parabhava panchangam table on p. 83
+# (headings రాహుకాలము / యమకంటక కాలము / గుళిక కాలము; columns ఘంటలు మొదలు / వరకు).
+# p. 84: the day from 6 AM to 6 PM is divided into eight 1½-hour periods; the book notes that
+# they shift with the actual sunrise and sunset. Times are 24-hour, on that 6 AM basis.
+# Keys: mon..sun. Values: [start, end, printed "start – end" as in the table].
+source:
+  document: TTD_panchangam.pdf
+  pages: [83, 84]
+periods:
+  rahukalam:
+    mon: ["07:30", "09:00", "7½ – 9"]
+    tue: ["15:00", "16:30", "3 – 4½"]
+    wed: ["12:00", "13:30", "12 – 1½"]
+    thu: ["13:30", "15:00", "1½ – 3"]
+    fri: ["10:30", "12:00", "10½ – 12"]
+    sat: ["09:00", "10:30", "9 – 10½"]
+    sun: ["16:30", "18:00", "4½ – 6"]
+  yamagandam:
+    mon: ["10:30", "12:00", "10½ – 12"]
+    tue: ["09:00", "10:30", "9 – 10½"]
+    wed: ["07:30", "09:00", "7½ – 9"]
+    thu: ["06:00", "07:30", "6 – 7½"]
+    fri: ["15:00", "16:30", "3 – 4½"]
+    sat: ["13:30", "15:00", "1½ – 3"]
+    sun: ["12:00", "13:30", "12 – 1½"]
+  gulika:
+    mon: ["13:30", "15:00", "1½ – 3"]
+    tue: ["12:00", "13:30", "12 – 1½"]
+    wed: ["10:30", "12:00", "10½ – 12"]
+    thu: ["09:00", "10:30", "9 – 10½"]
+    fri: ["07:30", "09:00", "7½ – 9"]
+    sat: ["06:00", "07:30", "6 – 7½"]
+    sun: ["15:00", "16:30", "3 – 4½"]

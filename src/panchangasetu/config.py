@@ -90,6 +90,7 @@ class Settings(BaseSettings):
     router_examples_path: Path = Path("config/router_examples.yaml")
     router_min_confidence: float = Field(0.65, ge=0, le=1)
     query_glossary_path: Path = Path("config/query_glossary.yaml")
+    weekday_periods_path: Path = Path("config/weekday_periods.yaml")  # rahukalam/yamagandam/gulika
 
     # --- answer generation ---
     # Providers tried in order; out-of-credits or outages fall through to the next one.
