@@ -97,7 +97,7 @@ def build_vector_index(settings: Settings) -> VectorIndex:
 
     key = settings.qdrant_api_key.get_secret_value() if settings.qdrant_api_key else None
     return VectorIndex(
-        QdrantClient(url=settings.qdrant_url, api_key=key),
+        QdrantClient(url=settings.qdrant_url, api_key=key, timeout=settings.qdrant_timeout_s),
         make_session_factory(make_engine(settings.database_url)),
         build_embedder(settings),
         TeluguSparseEncoder(),
