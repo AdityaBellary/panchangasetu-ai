@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     qdrant_api_key: SecretStr | None = None
     index_prefix: str = "psetu"
     embedding_provider: Literal["fastembed", "openai"] = "fastembed"
-    # Chosen by the Phase 3 bake-off (docs/phase-3-retrieval.md): best cross-lingual recall.
+    # Chosen by the Phase 3 bake-off: best cross-lingual recall.
     embedding_model: str = "intfloat/multilingual-e5-large"
     openai_embedding_dimensions: int | None = None
     model_cache_dir: Path = Path("data/models")
@@ -87,7 +87,7 @@ class Settings(BaseSettings):
     retrieval_top_k: int = Field(8, ge=1, le=50)
     retrieval_candidates: int = Field(30, ge=5, le=200)
     # Lexical (Telugu sparse) fusion only for queries that are mostly Telugu script; the
-    # bake-off showed it degrades English queries (docs/phase-3-retrieval.md).
+    # bake-off showed it degrades English queries.
     hybrid_min_telugu_ratio: float = Field(0.5, ge=0, le=1)
     keep_previous_index_builds: int = Field(1, ge=0)
     timezone: str = "Asia/Kolkata"  # "today" is evaluated here, not in the server's timezone
@@ -110,7 +110,7 @@ class Settings(BaseSettings):
     llm_pricing_path: Path = Path("config/llm_pricing.yaml")
     # Tried once when the primary cannot produce a verified answer although sources were found (hard
     # list lookups, complex rules). Gemini answered 16/19 held-out questions to Sarvam's 13 at ~4.5x the
-    # cost (docs/llm-models.md), so only those questions pay for it. "" disables escalation.
+    # cost (2026-11-08 benchmark), so only those questions pay for it. "" disables escalation.
     escalation_provider: Literal["", "gemini", "openai", "sarvam"] = "gemini"
     # Used when escalation_provider is "sarvam": reasons, ~20 s and ~₹0.3 per answer, and on large
     # prompts needs >4k reasoning tokens (Phase 5 probe).

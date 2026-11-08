@@ -1,6 +1,6 @@
 # Structured extraction: which pages of which documents hold dated panchanga facts, and how to
 # read them. Facts land in Postgres tables (panchanga_days, panchanga_events) and are what
-# date questions are answered from. See docs/phase-2b-structured-calendar.md.
+# date questions are answered from.
 
 sources:
   - match: "TTD_panchangam.pdf"   # Sri Parabhava nama samvatsara Siddhanti panchangam 2026-27

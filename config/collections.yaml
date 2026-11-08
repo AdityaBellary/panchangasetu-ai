@@ -7,7 +7,7 @@
 #               planetary transit dates, month start/end dates.
 #   general   = explanations, stotras, predictions, rules (WHAT / WHY / HOW), even when they use
 #               panchanga vocabulary heavily.
-# Section map below was derived from the first full OCR run (2026-11-07); see docs/phase-2-ingestion.md.
+# Section map below was derived from the first full OCR run (2026-11-07).
 
 documents:
   - match: "TTD-Calendar-*.pdf"

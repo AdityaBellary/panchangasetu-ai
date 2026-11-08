@@ -4,8 +4,7 @@ Telugu document intelligence and grounded RAG platform. It answers Telugu and En
 about TTD panchangam and calendar PDFs, with citations, and abstains when the documents
 don't support an answer.
 
-Status: all 9 phases complete (Phase 9: held-out evaluation). See `docs/phase-1-architecture.md` through
-`docs/phase-9-evaluation.md`.
+Status: all 9 phases complete (Phase 9: held-out evaluation).
 
 ## Web chat
 
