@@ -75,6 +75,21 @@ class ConversationService:
             for t in self.store.recent_turns(session_id, self.history_turns)
             if now - t.asked_at <= self.idle
         ]
+        with collect_calls() as calls:
+            try:
+                return self._answer(question, session_id, history, now)
+            except BaseException:
+                # The turn was not saved (session deleted mid-answer, or answering failed after a
+                # paid call): its spend still counts, or deleting sessions would dodge the budget.
+                if calls:
+                    for c in calls:
+                        c.at = now
+                    self.store.add_calls(
+                        calls, session_id=session_id, owner=owner, request_id=request_id_var.get()
+                    )
+                raise
+
+    def _answer(self, question: str, session_id: str, history: list[TurnRecord], now: datetime) -> Answer:
         allow_llm = self.llm_allowed(now)
         t0 = time.perf_counter()
         with collect_calls() as calls:

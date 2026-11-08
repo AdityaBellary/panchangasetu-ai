@@ -68,6 +68,12 @@ class SessionStore(Protocol):
 
     def add_turn(self, session_id: str, turn: TurnRecord) -> None: ...
 
+    def add_calls(
+        self, calls: list[LlmCall], *, session_id: str | None, owner: str | None, request_id: str | None
+    ) -> None:
+        """Record LLM calls that belong to no saved turn, so their spend still counts."""
+        ...
+
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         """Most recently active first; empty sessions are left out."""
         ...
@@ -109,6 +115,11 @@ class InMemorySessionStore:
             raise SessionNotFound(session_id)
         self._turns[session_id].append(turn)
         self._calls.extend(turn.llm_calls)
+
+    def add_calls(
+        self, calls: list[LlmCall], *, session_id: str | None, owner: str | None, request_id: str | None
+    ) -> None:
+        self._calls.extend(calls)
 
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         out = [
@@ -206,25 +217,15 @@ class SqlSessionStore:
             s.add(row)
             chat.updated_at = utcnow()
             s.flush()  # the turn's id links its LLM calls
-            for c in turn.llm_calls:  # same transaction as the turn: spend is never recorded without it
-                s.add(
-                    LlmCallRecord(
-                        at=c.at,
-                        turn_id=row.id,
-                        session_id=sid,
-                        owner=chat.owner,
-                        request_id=turn.request_id,
-                        purpose=c.purpose,
-                        provider=c.provider,
-                        model=c.model,
-                        prompt_tokens=c.prompt_tokens,
-                        completion_tokens=c.completion_tokens,
-                        cost_inr=c.cost_inr,
-                        latency_ms=c.latency_ms,
-                        status=c.status,
-                        error=c.error,
-                    )
-                )
+            for c in turn.llm_calls:  # same transaction as the turn: never one without the other
+                s.add(_call_row(c, row.id, sid, chat.owner, turn.request_id))
+
+    def add_calls(
+        self, calls: list[LlmCall], *, session_id: str | None, owner: str | None, request_id: str | None
+    ) -> None:
+        sid = _uuid(session_id) if session_id else None
+        with session_scope(self.factory) as s:
+            s.add_all(_call_row(c, None, sid, owner, request_id) for c in calls)
 
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         with session_scope(self.factory) as s:
@@ -302,4 +303,29 @@ def _record(r: ChatTurn) -> TurnRecord:
         reason=r.reason,
         timings=dict(r.timings or {}),
         sources=list(r.sources or []),
+    )
+
+
+def _call_row(
+    c: LlmCall,
+    turn_id: uuid.UUID | None,
+    session_id: uuid.UUID | None,
+    owner: str | None,
+    request_id: str | None,
+) -> LlmCallRecord:
+    return LlmCallRecord(
+        at=c.at,
+        turn_id=turn_id,
+        session_id=session_id,
+        owner=owner,
+        request_id=request_id,
+        purpose=c.purpose,
+        provider=c.provider,
+        model=c.model,
+        prompt_tokens=c.prompt_tokens,
+        completion_tokens=c.completion_tokens,
+        cost_inr=c.cost_inr,
+        latency_ms=c.latency_ms,
+        status=c.status,
+        error=c.error,
     )

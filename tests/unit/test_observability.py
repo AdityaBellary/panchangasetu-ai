@@ -19,7 +19,7 @@ from panchangasetu.api.keys import Client
 from panchangasetu.conversation.followup import FollowUpResolver
 from panchangasetu.conversation.service import ConversationService
 from panchangasetu.conversation.store import SqlSessionStore
-from panchangasetu.core.interfaces import ChatMessage
+from panchangasetu.core.interfaces import ChatMessage, LLMResult
 from panchangasetu.generation.answerer import AnswerService
 from panchangasetu.observability.calls import PriceTable, call_purpose, collect_calls
 from panchangasetu.observability.ops import OpsQueries, percentile
@@ -219,3 +219,33 @@ def test_escalation_uses_the_gemini_chain_by_default(monkeypatch: pytest.MonkeyP
     assert build_escalation_llm(Settings(_env_file=None, escalation_provider="")) is None  # type: ignore[call-arg]
     monkeypatch.delenv("GEMINI_API_KEY")
     assert build_escalation_llm(Settings(_env_file=None)) is None  # type: ignore[call-arg]  # no key
+
+
+# ------------------------------------------------------------------ spend is never lost
+def test_deleting_the_session_mid_answer_still_counts_the_spend() -> None:
+    from panchangasetu.conversation.store import SessionNotFound
+
+    class DeletesSession(FakeLLM):
+        def complete(self, *a: object, **kw: object) -> LLMResult:  # type: ignore[override]
+            svc.store.delete(sid)  # the client deletes the conversation while it is being answered
+            return super().complete(*a, **kw)  # type: ignore[arg-type]
+
+    svc, ops, _ = _stack(DeletesSession([reply("Kuja dosha does not apply when Mars is with Jupiter.")]))
+    sid = svc.start("client-a")
+    with pytest.raises(SessionNotFound):
+        svc.ask("What is Kuja dosha?", session_id=sid, owner="client-a", now=NOW)
+    assert svc.spent_today(NOW) == pytest.approx(0.021)
+    [call] = ops.calls()
+    assert call["turn_id"] is None and call["purpose"] == "answer"
+
+
+def test_a_failure_after_a_paid_call_still_counts_the_spend() -> None:
+    class Breaks(FakeLLM):
+        def complete(self, *a: object, **kw: object) -> LLMResult:  # type: ignore[override]
+            super().complete(*a, **kw)  # type: ignore[arg-type]
+            raise RuntimeError("bug after the call was paid for")
+
+    svc, _, _ = _stack(Breaks([reply("x")]))
+    with pytest.raises(RuntimeError):
+        svc.ask("What is Kuja dosha?", now=NOW)
+    assert svc.spent_today(NOW) == pytest.approx(0.021)
