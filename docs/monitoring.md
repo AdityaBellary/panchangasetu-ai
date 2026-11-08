@@ -1,5 +1,7 @@
 # Monitoring and observability
 
+![How monitoring works](../assets/monitoring.svg)
+
 Three layers, from "what is this one request doing?" up to "how is the service doing this month?".
 
 ## 1. Per-request and per-call records (always on)

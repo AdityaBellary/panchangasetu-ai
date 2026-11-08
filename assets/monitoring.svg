@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" width="1200" height="660" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">How PanchangaSetu is monitored</title>
+  <desc id="d">Every request and every AI call is recorded with tokens, rupee cost and latency, stored in Postgres, and shown on the admin dashboard; the daily budget reads today's spend from the same records, and live counters feed Prometheus and Grafana.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a5584"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #c3cae6; stroke-width: 1.5; }
+      .h { font-size: 19px; font-weight: 600; fill: #1c2552; }
+      .s { font-size: 15.5px; fill: #5b6488; }
+      .t { font-size: 17px; font-weight: 700; fill: #1c2552; }
+      .title { font-size: 22px; font-weight: 700; fill: #1c2552; }
+      .flow { stroke: #4a5584; stroke-width: 2; fill: none; marker-end: url(#a); }
+      .lbl { font-size: 15px; fill: #4a5584; font-style: italic; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="660" rx="18" fill="#ffffff"/>
+
+  <!-- 1 · Record -->
+  <rect x="20" y="20" width="420" height="620" rx="16" fill="#eef1fb" stroke="#d6dcf1" stroke-width="1.5"/>
+  <text x="44" y="58" class="title">1 · Record</text>
+
+  <rect class="box" x="44" y="96" width="372" height="74" rx="10"/>
+  <text x="230" y="127" text-anchor="middle" class="h">API request</text>
+  <text x="230" y="151" text-anchor="middle" class="s">request id · which API key asked</text>
+
+  <rect class="box" x="44" y="200" width="372" height="74" rx="10"/>
+  <text x="230" y="231" text-anchor="middle" class="h">Answer pipeline</text>
+  <text x="230" y="255" text-anchor="middle" class="s">every stage timed: route, search, AI</text>
+
+  <rect class="box" x="44" y="304" width="372" height="96" rx="10"/>
+  <text x="230" y="336" text-anchor="middle" class="h">Every AI call</text>
+  <text x="230" y="360" text-anchor="middle" class="s">model · tokens · ₹ cost · latency · status</text>
+  <text x="230" y="382" text-anchor="middle" class="s">priced from config/llm_pricing.yaml</text>
+
+  <rect class="box" x="44" y="440" width="372" height="74" rx="10"/>
+  <text x="230" y="471" text-anchor="middle" class="h">Live counters</text>
+  <text x="230" y="495" text-anchor="middle" class="s">requests, tokens, ₹, stage timings</text>
+
+  <path class="flow" d="M230 170 V198"/>
+  <path class="flow" d="M230 274 V302"/>
+  <path class="flow" d="M230 400 V438"/>
+
+  <!-- 2 · Store -->
+  <rect x="460" y="20" width="280" height="620" rx="16" fill="#f5f6f9" stroke="#e1e4ec" stroke-width="1.5"/>
+  <text x="484" y="58" class="title">2 · Store</text>
+
+  <path d="M488 110 V430 A112 16 0 0 0 712 430 V110" fill="#ffffff" stroke="#c3cae6" stroke-width="1.5"/>
+  <ellipse cx="600" cy="110" rx="112" ry="16" fill="#e8ecfa" stroke="#c3cae6" stroke-width="1.5"/>
+  <text x="600" y="164" text-anchor="middle" class="h">Postgres</text>
+  <text x="600" y="224" text-anchor="middle" class="t">chat_turns</text>
+  <text x="600" y="248" text-anchor="middle" class="s">question, answer,</text>
+  <text x="600" y="268" text-anchor="middle" class="s">sources, timings</text>
+  <text x="600" y="330" text-anchor="middle" class="t">llm_calls</text>
+  <text x="600" y="354" text-anchor="middle" class="s">one row per AI call,</text>
+  <text x="600" y="374" text-anchor="middle" class="s">kept when chats</text>
+  <text x="600" y="394" text-anchor="middle" class="s">are deleted</text>
+
+  <path class="flow" d="M416 237 H486"/>
+  <path class="flow" d="M416 352 H486"/>
+
+  <!-- 3 · See and act -->
+  <rect x="760" y="20" width="420" height="620" rx="16" fill="#eef7f6" stroke="#d3e8e5" stroke-width="1.5"/>
+  <text x="784" y="58" class="title">3 · See and act</text>
+
+  <rect class="box" x="784" y="96" width="372" height="124" rx="10"/>
+  <text x="970" y="128" text-anchor="middle" class="h">Admin dashboard</text>
+  <text x="970" y="152" text-anchor="middle" class="s">/dashboard.html · admin key only</text>
+  <text x="970" y="176" text-anchor="middle" class="s">spend, tokens, latency, refusals,</text>
+  <text x="970" y="198" text-anchor="middle" class="s">full trace of every request</text>
+
+  <rect x="784" y="300" width="372" height="104" rx="10" fill="#fff4e3" stroke="#c2771a" stroke-width="1.5"/>
+  <text x="970" y="332" text-anchor="middle" class="h">Daily budget</text>
+  <text x="970" y="356" text-anchor="middle" class="s">today's ₹ comes from llm_calls</text>
+  <text x="970" y="380" text-anchor="middle" class="s">AI stops at ₹25; calendar stays free</text>
+
+  <rect class="box" x="784" y="440" width="372" height="74" rx="10"/>
+  <text x="970" y="471" text-anchor="middle" class="h">/metrics</text>
+  <text x="970" y="495" text-anchor="middle" class="s">Prometheus endpoint, token-protected</text>
+
+  <rect class="box" x="784" y="548" width="372" height="74" rx="10"/>
+  <text x="970" y="579" text-anchor="middle" class="h">Prometheus → Grafana</text>
+  <text x="970" y="603" text-anchor="middle" class="s">dashboard + 6 alert rules (optional)</text>
+
+  <path class="flow" d="M714 158 H782"/>
+  <path class="flow" d="M714 352 H782"/>
+  <path class="flow" d="M416 477 H782"/>
+  <path class="flow" d="M970 514 V546"/>
+  <text x="748" y="150" text-anchor="middle" class="lbl">reads</text>
+  <text x="748" y="344" text-anchor="middle" class="lbl">sums</text>
+  <text x="600" y="469" text-anchor="middle" class="lbl">scraped live</text>
+</svg>
