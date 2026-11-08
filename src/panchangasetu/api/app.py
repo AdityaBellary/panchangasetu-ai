@@ -10,6 +10,8 @@
   DELETE /v1/sessions/{id}
   GET  /v1/pages/{document}/{page}   the source page image a citation points to
   GET  /v1/today              today's tithi (with moon phase), nakshatra and rahukalam
+  GET  /v1/admin/...          monitoring (admin keys): overview, request log, traces, LLM calls
+  GET  /dashboard.html        monitoring dashboard (static; uses the admin endpoints)
 
 Every /v1 call needs `Authorization: Bearer <key>` (or `X-API-Key`). Sessions belong to the key
 that created them; another key gets 404, never someone else's conversation. Answering is
@@ -38,8 +40,10 @@ from panchangasetu.api.keys import Client
 from panchangasetu.conversation.service import ConversationService
 from panchangasetu.conversation.store import SessionNotFound
 from panchangasetu.generation.answerer import Answer
+from panchangasetu.observability.context import request_id_var
 from panchangasetu.observability.logging import get_logger
 from panchangasetu.observability.metrics import HTTP_REQUESTS, HTTP_SECONDS, REGISTRY
+from panchangasetu.observability.ops import OpsQueries
 
 log = get_logger(__name__)
 STATIC_DIR = Path(__file__).parent / "static"
@@ -61,6 +65,7 @@ class ApiServices:
     pages: PageImages | None = None
     readiness: Callable[[], dict[str, bool]] | None = None
     today: Callable[[], dict[str, Any]] | None = None
+    ops: OpsQueries | None = None  # monitoring queries (admin keys only)
     rate_limit_per_minute: int = 30
     max_question_chars: int = 500
     metrics_token: str | None = None
@@ -191,7 +196,8 @@ def create_app(services: ApiServices) -> FastAPI:
 
     @app.middleware("http")
     async def request_context(request: Request, call_next: Callable[[Request], Any]) -> Response:
-        rid = request.headers.get("x-request-id") or uuid.uuid4().hex[:16]
+        rid = (request.headers.get("x-request-id") or uuid.uuid4().hex)[:32]
+        request_id_var.set(rid)  # links the stored turn and its LLM calls to this request
         t0 = time.perf_counter()
         try:
             response: Response = await call_next(request)
@@ -261,6 +267,44 @@ def create_app(services: ApiServices) -> FastAPI:
         checks = services.readiness() if services.readiness else {}
         ok = all(checks.values())
         return JSONResponse({"ready": ok, "checks": checks}, status_code=200 if ok else 503)
+
+    def admin(who: Authed) -> Client:
+        if not who.is_admin:
+            raise HTTPException(403, "monitoring needs an admin key (psetu api-keys create NAME --admin)")
+        if services.ops is None:
+            raise HTTPException(404, "monitoring is not configured")
+        return who
+
+    Admin = Annotated[Client, Depends(admin)]
+
+    @app.get("/v1/whoami")
+    def whoami(who: Authed) -> dict[str, Any]:
+        return {"name": who.name, "is_admin": who.is_admin}
+
+    @app.get("/v1/admin/overview")
+    def admin_overview(_: Admin, hours: int = 24) -> dict[str, Any]:
+        assert services.ops is not None
+        return services.ops.overview(min(max(hours, 1), 24 * 90))
+
+    @app.get("/v1/admin/requests")
+    def admin_requests(
+        _: Admin, limit: int = 50, offset: int = 0, method: str | None = None
+    ) -> list[dict[str, Any]]:
+        assert services.ops is not None
+        return services.ops.requests(min(max(limit, 1), 500), max(offset, 0), method)
+
+    @app.get("/v1/admin/requests/{turn_id}")
+    def admin_trace(turn_id: str, _: Admin) -> dict[str, Any]:
+        assert services.ops is not None
+        trace = services.ops.trace(turn_id)
+        if trace is None:
+            raise HTTPException(404, "request not found")
+        return trace
+
+    @app.get("/v1/admin/calls")
+    def admin_calls(_: Admin, limit: int = 100, errors: bool = False) -> list[dict[str, Any]]:
+        assert services.ops is not None
+        return services.ops.calls(min(max(limit, 1), 1000), errors)
 
     @app.get("/v1/today")
     def today(who: Authed) -> dict[str, Any]:

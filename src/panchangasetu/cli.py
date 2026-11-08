@@ -195,14 +195,11 @@ def cmd_retrieve(settings: Settings, args: argparse.Namespace) -> int:
 
 
 def build_answer_service(settings: Settings) -> AnswerService:
-    from panchangasetu.providers.llm.factory import build_llm
-    from panchangasetu.providers.llm.openai_compatible import sarvam_chat
+    from panchangasetu.providers.llm.factory import build_escalation_llm, build_llm
 
-    escalation = None
-    key = settings.sarvam_api_key.get_secret_value() if settings.sarvam_api_key else ""
-    if settings.escalation_model and key:
-        escalation = sarvam_chat(key, settings.escalation_model, timeout_s=max(settings.llm_timeout_s, 180))
-    return AnswerService(build_retriever(settings), build_llm(settings), escalation=escalation)
+    return AnswerService(
+        build_retriever(settings), build_llm(settings), escalation=build_escalation_llm(settings)
+    )
 
 
 def build_conversation_service(settings: Settings) -> ConversationService:
@@ -322,15 +319,17 @@ def cmd_api_keys(settings: Settings, args: argparse.Namespace) -> int:
 
     store = ApiKeyStore(make_session_factory(make_engine(settings.database_url)))
     if args.keys_cmd == "create":
-        key, info = store.create(args.name, rate_limit_per_minute=args.rate_limit)
-        print(f"Created key '{info.name}' (id {info.id}, prefix {info.prefix}).")
+        key, info = store.create(args.name, rate_limit_per_minute=args.rate_limit, admin=args.admin)
+        role = "admin (chat + monitoring)" if info.is_admin else "chat"
+        print(f"Created {role} key '{info.name}' (id {info.id}, prefix {info.prefix}).")
         print("Copy it now; it is not stored and cannot be shown again:\n")
         print(f"  {key}\n")
     elif args.keys_cmd == "list":
         for k in store.list():
             state = f"revoked {k.revoked_at:%Y-%m-%d}" if k.revoked_at else "active"
             used = f"last used {k.last_used_at:%Y-%m-%d %H:%M}" if k.last_used_at else "never used"
-            print(f"{k.prefix}…  {k.name:20} {state:18} {used}  id={k.id}")
+            role = "admin" if k.is_admin else "chat"
+            print(f"{k.prefix}…  {k.name:20} {role:6} {state:18} {used}  id={k.id}")
     else:
         n = store.revoke(args.key_id)
         print(f"Revoked {n} key(s).")
@@ -489,6 +488,7 @@ def main(argv: list[str] | None = None) -> int:
     kc = keys.add_parser("create", help="create a key (shown once)")
     kc.add_argument("name")
     kc.add_argument("--rate-limit", type=int, help="requests per minute (default: server setting)")
+    kc.add_argument("--admin", action="store_true", help="may open the monitoring dashboard")
     keys.add_parser("list", help="list keys (never shows the keys themselves)")
     kr = keys.add_parser("revoke", help="revoke a key by id or prefix")
     kr.add_argument("key_id")

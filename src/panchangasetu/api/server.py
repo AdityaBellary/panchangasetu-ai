@@ -13,6 +13,7 @@ from panchangasetu.api.app import ApiServices, create_app
 from panchangasetu.api.keys import ApiKeyStore
 from panchangasetu.api.today import today_facts
 from panchangasetu.config import Settings, get_settings
+from panchangasetu.observability.ops import OpsQueries
 from panchangasetu.storage.db import make_engine, make_session_factory, session_scope
 from panchangasetu.storage.models import Document, DocumentVersion, Page
 from panchangasetu.storage.object_store import LocalObjectStore
@@ -74,6 +75,7 @@ def build_services(settings: Settings) -> ApiServices:
         pages=StoredPageImages(factory, LocalObjectStore(settings.object_store_dir)),
         readiness=readiness,
         today=today,
+        ops=OpsQueries(factory, settings.timezone, settings.llm_daily_budget_inr),
         rate_limit_per_minute=settings.api_rate_limit_per_minute,
         max_question_chars=settings.api_max_question_chars,
         metrics_token=settings.api_metrics_token.get_secret_value() if settings.api_metrics_token else None,

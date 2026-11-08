@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: PanchangaSetu
+    folder: PanchangaSetu
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

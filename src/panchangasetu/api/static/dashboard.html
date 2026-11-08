@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>PanchangaSetu monitoring</title>
+  <link rel="icon" href="moon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js" type="module"></script>
+</head>
+<body class="dash-body">
+  <section class="gate" id="gate" hidden>
+    <form class="gate-card" id="gate-form" autocomplete="off">
+      <div class="wordmark">
+        <span class="wordmark-te" lang="te">పంచాంగ సేతు</span>
+        <span class="wordmark-en">Monitoring</span>
+      </div>
+      <p class="gate-lede">Usage, spend, tokens and latency for every answer and every LLM call.</p>
+      <label for="gate-key">Admin API key</label>
+      <input id="gate-key" type="password" spellcheck="false" placeholder="psk_…" required>
+      <p class="gate-help">Create one on the server with <code>uv run psetu api-keys create ops --admin</code>.</p>
+      <p class="gate-error" id="gate-error" role="alert" hidden></p>
+      <button type="submit" class="btn-primary">Open monitoring</button>
+    </form>
+  </section>
+
+  <div class="dash" id="dash" hidden>
+    <header class="dash-top">
+      <div class="dash-title">
+        <span class="wordmark-te" lang="te">పంచాంగ సేతు</span>
+        <span class="dash-name">Monitoring</span>
+      </div>
+      <div class="dash-controls">
+        <div class="seg" role="group" aria-label="Time range">
+          <button type="button" data-hours="24" aria-pressed="true">24 hours</button>
+          <button type="button" data-hours="168" aria-pressed="false">7 days</button>
+          <button type="button" data-hours="720" aria-pressed="false">30 days</button>
+        </div>
+        <label class="auto"><input type="checkbox" id="auto" checked> Refresh every 30 s</label>
+        <span class="updated" id="updated"></span>
+        <a class="link-quiet" href="/">Chat</a>
+        <button type="button" class="link-quiet" id="sign-out">Forget key</button>
+      </div>
+    </header>
+
+    <main class="dash-main">
+      <section class="tiles" id="tiles" aria-label="Summary"></section>
+
+      <section class="grid2">
+        <figure class="card" id="card-mix"></figure>
+        <figure class="card" id="card-cost"></figure>
+        <figure class="card" id="card-latency"></figure>
+        <figure class="card" id="card-stages"></figure>
+        <figure class="card" id="card-reasons"></figure>
+        <figure class="card" id="card-mixes"></figure>
+      </section>
+
+      <section class="card wide" id="card-models"></section>
+      <section class="card wide" id="card-clients"></section>
+
+      <section class="card wide">
+        <div class="card-head">
+          <div class="tabs" role="tablist">
+            <button role="tab" type="button" id="tab-requests" aria-selected="true">Requests</button>
+            <button role="tab" type="button" id="tab-calls" aria-selected="false">LLM calls</button>
+          </div>
+          <div class="filters" id="filters"></div>
+        </div>
+        <div id="log"></div>
+      </section>
+    </main>
+
+    <aside class="drawer trace" id="trace" aria-label="Request trace" hidden>
+      <header class="drawer-head">
+        <div>
+          <p class="drawer-doc">Request trace</p>
+          <p class="drawer-meta" id="trace-meta"></p>
+        </div>
+        <button class="btn-close" id="trace-close" type="button" aria-label="Close trace">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+      <div class="drawer-body" id="trace-body"></div>
+    </aside>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
+  </div>
+</body>
+</html>

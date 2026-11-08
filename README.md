@@ -15,7 +15,9 @@ uv run psetu serve                 # open http://127.0.0.1:8000/ and paste the k
 ```
 
 Or everything in containers (give Docker at least 6 GB of memory): `docker compose up -d --build api`.
-Metrics are at `/metrics`. LLM spend is capped per day (`PSETU_LLM_DAILY_BUDGET_INR`, default ₹25); calendar
+Monitoring: `uv run psetu api-keys create ops --admin`, then open `/dashboard.html` for spend, tokens, latency
+and a trace of every request and LLM call; `docker compose --profile monitoring up -d` adds Prometheus + Grafana
+(see `docs/monitoring.md`). LLM spend is capped per day (`PSETU_LLM_DAILY_BUDGET_INR`, default ₹25); calendar
 answers stay free and keep working.
 
 ## Quick start (local)

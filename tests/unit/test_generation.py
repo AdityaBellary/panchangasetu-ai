@@ -18,6 +18,7 @@ from panchangasetu.generation.templates import (
     render_occurrence_answer,
 )
 from panchangasetu.generation.verify import check_answer, check_quotes, quote_support, strip_citation_markers
+from panchangasetu.observability.calls import LlmCall, current_purpose, record_call
 from panchangasetu.providers.llm.openai_compatible import FallbackLLM, OpenAICompatibleChat
 from panchangasetu.query.dates import DateSpec
 from panchangasetu.query.language import Language
@@ -198,7 +199,10 @@ class FakeLLM:
         reply = self.replies[min(self.calls, len(self.replies) - 1)]
         self.calls += 1
         if isinstance(reply, Exception):
+            record_call(LlmCall(current_purpose(), "fake", "fake-model", 0, 0, 0.0, 5.0, "error", str(reply)))
             raise reply
+        # Like the real providers: every call is recorded with its tokens and cost (₹15/₹60 per 1M).
+        record_call(LlmCall(current_purpose(), "fake", "fake-model", 1000, 100, 0.021, 5.0, "ok"))
         return LLMResult(reply, "fake-model", 1000, 100, 5.0)
 
 
@@ -338,3 +342,13 @@ def test_dates_are_not_read_as_times_and_number_words_count() -> None:
     assert check_answer("Makara Sankranti is on 2027-01-15 (15-01-2027).", [src], default_year=2027) == []
     assert check_answer("Brahma's lifespan is 100 years.", [src], default_year=2027) == []
     assert check_answer("Brahma's lifespan is 120 years.", [src], default_year=2027) != []
+
+
+def test_month_and_year_is_not_read_as_a_date() -> None:
+    from panchangasetu.generation.verify import dates_in
+
+    assert dates_in("In November 2026 Kumbha natives prosper; December 2026 brings travel.", 2026) == set()
+    assert {str(d) for d in dates_in("November 20, 2026 and 5 December 2026", 2026)} == {
+        "2026-11-20",
+        "2026-12-05",
+    }

@@ -379,6 +379,7 @@ async function start(key) {
   $("app").hidden = false;
   renderToday(today);
   $("today-pill").hidden = true;
+  api("/v1/whoami").then((me) => { $("monitoring").hidden = !me.is_admin; }).catch(() => {});
   loadHistory();
   $("question").focus();
 }

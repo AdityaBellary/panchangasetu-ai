@@ -38,7 +38,7 @@ Answer paths, cheapest and safest first:
 | Model | Latency | Cost/answer | Faithfulness on hard list/rule lookups |
 |---|---|---|---|
 | **`sarvam-105b-conversations`** (default) | 0.3–2 s | ₹0.03–0.11 | Good on prose/rules; **misreads dense lists sometimes** (e.g. right eye → left eye's entry) |
-| `sarvam-105b` (reasoning) | ~20 s | ~₹0.3 | Read the lizard table correctly, but **needs > 4k reasoning tokens**, and often returned empty output at 4k. Available as `PSETU_ESCALATION_MODEL`, off by default |
+| `sarvam-105b` (reasoning) | ~20 s | ~₹0.3 | Read the lizard table correctly, but **needs > 4k reasoning tokens**, and often returned empty output at 4k. Available with `PSETU_ESCALATION_PROVIDER=sarvam` (`PSETU_ESCALATION_MODEL`); Gemini is the default escalation since Nov 2026 |
 | `gpt-4.1-mini` (OpenAI fallback) | n/a | n/a | **Not tested: the OpenAI account still reports no credits.** Configured as fallback and worth benchmarking as primary |
 
 ## 4. Bugs and data issues found by testing answers (all fixed)

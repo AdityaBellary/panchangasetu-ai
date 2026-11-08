@@ -10,8 +10,9 @@ from typing import Any, Protocol
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
 
+from panchangasetu.observability.calls import LlmCall
 from panchangasetu.storage.db import session_scope
-from panchangasetu.storage.models import ChatSession, ChatTurn, LlmSpend, utcnow
+from panchangasetu.storage.models import ChatSession, ChatTurn, LlmCallRecord, utcnow
 
 
 @dataclass(slots=True)
@@ -29,6 +30,14 @@ class TurnRecord:
     model: str | None = None
     cost_inr: float = 0.0
     latency_ms: float = 0.0
+    # Observability (trace view)
+    request_id: str | None = None
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    reason: str = ""
+    timings: dict[str, float] = field(default_factory=dict)
+    sources: list[dict[str, Any]] = field(default_factory=list)
+    llm_calls: list[LlmCall] = field(default_factory=list)
 
     @property
     def cited_dates(self) -> list[str]:
@@ -66,8 +75,8 @@ class SessionStore(Protocol):
     def delete(self, session_id: str, owner: str | None = None) -> bool: ...
 
     def spent_since(self, since: datetime) -> float:
-        """LLM spend (INR) since `since`, across all sessions, from an append-only ledger written
-        with each turn. Deleting or pruning conversations does not lower it."""
+        """LLM spend (INR) since `since`, across all sessions, from the append-only record of LLM
+        calls written with each turn. Deleting or pruning conversations does not lower it."""
         ...
 
     def prune(self, inactive_before: datetime) -> int:
@@ -78,7 +87,7 @@ class SessionStore(Protocol):
 class InMemorySessionStore:
     def __init__(self) -> None:
         self._turns: dict[str, list[TurnRecord]] = {}
-        self._spend: list[tuple[datetime, float]] = []
+        self._calls: list[LlmCall] = []
         self._owners: dict[str, str | None] = {}
 
     def create(self, owner: str | None = None) -> str:
@@ -99,8 +108,7 @@ class InMemorySessionStore:
         if session_id not in self._turns:
             raise SessionNotFound(session_id)
         self._turns[session_id].append(turn)
-        if turn.cost_inr:
-            self._spend.append((turn.asked_at, turn.cost_inr))
+        self._calls.extend(turn.llm_calls)
 
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         out = [
@@ -117,7 +125,7 @@ class InMemorySessionStore:
         return True
 
     def spent_since(self, since: datetime) -> float:
-        return sum(cost for at, cost in self._spend if at >= since)
+        return sum(c.cost_inr for c in self._calls if c.at >= since)
 
     def prune(self, inactive_before: datetime) -> int:
         stale = [sid for sid, turns in self._turns.items() if turns and turns[-1].asked_at < inactive_before]
@@ -172,28 +180,51 @@ class SqlSessionStore:
             if chat is None:
                 raise SessionNotFound(session_id)
             seq = (s.scalar(select(func.max(ChatTurn.seq)).where(ChatTurn.session_id == sid)) or 0) + 1
-            s.add(
-                ChatTurn(
-                    session_id=sid,
-                    seq=seq,
-                    question=turn.question,
-                    standalone_question=turn.standalone_question,
-                    rewrite_method=turn.rewrite_method,
-                    language=turn.language,
-                    answer=turn.answer,
-                    abstained=turn.abstained,
-                    method=turn.method,
-                    route=turn.route,
-                    citations=turn.citations,
-                    model=turn.model,
-                    cost_inr=turn.cost_inr,
-                    latency_ms=turn.latency_ms,
-                    asked_at=turn.asked_at,
-                )
+            row = ChatTurn(
+                session_id=sid,
+                seq=seq,
+                question=turn.question,
+                standalone_question=turn.standalone_question,
+                rewrite_method=turn.rewrite_method,
+                language=turn.language,
+                answer=turn.answer,
+                abstained=turn.abstained,
+                method=turn.method,
+                route=turn.route,
+                citations=turn.citations,
+                model=turn.model,
+                cost_inr=turn.cost_inr,
+                latency_ms=turn.latency_ms,
+                asked_at=turn.asked_at,
+                request_id=turn.request_id,
+                prompt_tokens=turn.prompt_tokens,
+                completion_tokens=turn.completion_tokens,
+                reason=turn.reason,
+                timings=turn.timings,
+                sources=turn.sources,
             )
+            s.add(row)
             chat.updated_at = utcnow()
-            if turn.cost_inr:  # same transaction as the turn: spend is never recorded without it
-                s.add(LlmSpend(spent_at=turn.asked_at, cost_inr=turn.cost_inr, owner=chat.owner))
+            s.flush()  # the turn's id links its LLM calls
+            for c in turn.llm_calls:  # same transaction as the turn: spend is never recorded without it
+                s.add(
+                    LlmCallRecord(
+                        at=c.at,
+                        turn_id=row.id,
+                        session_id=sid,
+                        owner=chat.owner,
+                        request_id=turn.request_id,
+                        purpose=c.purpose,
+                        provider=c.provider,
+                        model=c.model,
+                        prompt_tokens=c.prompt_tokens,
+                        completion_tokens=c.completion_tokens,
+                        cost_inr=c.cost_inr,
+                        latency_ms=c.latency_ms,
+                        status=c.status,
+                        error=c.error,
+                    )
+                )
 
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         with session_scope(self.factory) as s:
@@ -220,6 +251,12 @@ class SqlSessionStore:
         if not self.exists(session_id, owner):
             return False
         with session_scope(self.factory) as s:
+            # LLM calls outlive the conversation (spend history, daily budget); unlink them first so
+            # this holds on every database, not only where ON DELETE SET NULL is enforced.
+            turns = select(ChatTurn.id).where(ChatTurn.session_id == _uuid(session_id))
+            s.query(LlmCallRecord).filter(LlmCallRecord.turn_id.in_(turns)).update(
+                {LlmCallRecord.turn_id: None}, synchronize_session=False
+            )
             s.query(ChatTurn).filter(ChatTurn.session_id == _uuid(session_id)).delete()
             s.query(ChatSession).filter(ChatSession.id == _uuid(session_id)).delete()
         return True
@@ -227,7 +264,7 @@ class SqlSessionStore:
     def spent_since(self, since: datetime) -> float:
         with session_scope(self.factory) as s:
             total = s.scalar(
-                select(func.coalesce(func.sum(LlmSpend.cost_inr), 0.0)).where(LlmSpend.spent_at >= since)
+                select(func.coalesce(func.sum(LlmCallRecord.cost_inr), 0.0)).where(LlmCallRecord.at >= since)
             )
             return float(total or 0.0)
 
@@ -235,6 +272,10 @@ class SqlSessionStore:
         with session_scope(self.factory) as s:
             ids = list(s.scalars(select(ChatSession.id).where(ChatSession.updated_at < inactive_before)))
             if ids:
+                turns = select(ChatTurn.id).where(ChatTurn.session_id.in_(ids))
+                s.query(LlmCallRecord).filter(LlmCallRecord.turn_id.in_(turns)).update(
+                    {LlmCallRecord.turn_id: None}, synchronize_session=False
+                )
                 s.query(ChatTurn).filter(ChatTurn.session_id.in_(ids)).delete(synchronize_session=False)
                 s.query(ChatSession).filter(ChatSession.id.in_(ids)).delete(synchronize_session=False)
             return len(ids)
@@ -255,4 +296,10 @@ def _record(r: ChatTurn) -> TurnRecord:
         model=r.model,
         cost_inr=r.cost_inr,
         latency_ms=r.latency_ms,
+        request_id=r.request_id,
+        prompt_tokens=r.prompt_tokens,
+        completion_tokens=r.completion_tokens,
+        reason=r.reason,
+        timings=dict(r.timings or {}),
+        sources=list(r.sources or []),
     )

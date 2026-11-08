@@ -33,7 +33,8 @@ _EN_DAY_MONTH = re.compile(
     re.I,
 )
 _EN_MONTH_DAY = re.compile(
-    r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(20\d{2}))?",
+    # "(?!\d)": "November 2026" is a month and year, not 20 November (false refusals, 2026-11-08).
+    r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?!\d)(?:st|nd|rd|th)?(?:,?\s+(20\d{2}))?",
     re.I,
 )
 _TE_MONTH_ALT = "|".join(_TE_MONTHS)

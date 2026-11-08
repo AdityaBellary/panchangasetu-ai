@@ -13,9 +13,11 @@ from __future__ import annotations
 import json
 import re
 import time
+from contextlib import nullcontext
 from dataclasses import dataclass, field
 from datetime import datetime
 from itertools import zip_longest
+from typing import Any
 
 from panchangasetu.core.interfaces import LLM, LLMError
 from panchangasetu.generation.prompts import (
@@ -33,6 +35,7 @@ from panchangasetu.generation.templates import (
     render_occurrence_answer,
 )
 from panchangasetu.generation.verify import check_answer, check_quotes, strip_citation_markers
+from panchangasetu.observability.calls import LlmCall, call_purpose, collect_calls
 from panchangasetu.observability.logging import get_logger
 from panchangasetu.query.language import Language
 from panchangasetu.query.router import PanchangaMode
@@ -77,17 +80,21 @@ class Answer:
     # Set by the conversation layer (Phase 6): the follow-up rewritten as a standalone question.
     standalone_question: str | None = None
     session_id: str | None = None
+    # Observability: every LLM call made for this answer (cost and tokens above are their sums), the
+    # sources shown to the model, and the retrieval stage timings.
+    llm_calls: list[LlmCall] = field(default_factory=list)
+    sources: list[dict[str, Any]] = field(default_factory=list)
 
 
-@dataclass(frozen=True, slots=True)
-class Pricing:
-    """Per 1M tokens, in INR (Sarvam pricing page, 2026-11-07)."""
-
-    input_inr: float = 15.0
-    output_inr: float = 60.0
-
-    def cost(self, prompt_tokens: int, completion_tokens: int) -> float:
-        return round((prompt_tokens * self.input_inr + completion_tokens * self.output_inr) / 1_000_000, 5)
+def apply_calls(answer: Answer, calls: list[LlmCall]) -> None:
+    """Cost, tokens and model of an answer come from the calls actually made for it."""
+    answer.llm_calls = list(calls)
+    answer.prompt_tokens = sum(c.prompt_tokens for c in calls)
+    answer.completion_tokens = sum(c.completion_tokens for c in calls)
+    answer.cost_inr = round(sum(c.cost_inr for c in calls), 6)
+    answered_by = [c for c in calls if c.status == "ok" and c.purpose != "followup_rewrite"]
+    if answered_by:
+        answer.model = answered_by[-1].model
 
 
 def select_evidence(evidence: list[Evidence], limit: int) -> list[Evidence]:
@@ -101,6 +108,20 @@ def select_evidence(evidence: list[Evidence], limit: int) -> list[Evidence]:
     groups = [[e for e in searched if e.collection == c] for c in ("general", "panchanga")]
     mixed = [e for pair in zip_longest(*groups) for e in pair if e is not None]
     return (exact + mixed)[:limit]
+
+
+def _source(e: Evidence) -> dict[str, Any]:
+    """What the trace view shows for one source given to the model."""
+    return {
+        "kind": e.kind,
+        "collection": e.collection,
+        "document": e.document,
+        "pages": e.pages[:3],
+        "date": e.date,
+        "score": round(e.score, 3) if e.score is not None else None,
+        "section": e.source_kind,
+        "heading": " > ".join(str(h) for h in e.data.get("heading_path", []))[:160],
+    }
 
 
 def _citation(e: Evidence) -> Citation:
@@ -122,19 +143,22 @@ def _parse(text: str) -> dict[str, object] | None:
     return data if isinstance(data, dict) else None
 
 
+def _models(llm: LLM) -> set[str]:
+    providers = getattr(llm, "providers", [llm])
+    return {str(getattr(p, "model", "")) for p in providers}
+
+
 class AnswerService:
     def __init__(
         self,
         retriever: Retriever,
         llm: LLM | None,
         *,
-        pricing: Pricing | None = None,
         escalation: LLM | None = None,
         escalation_max_tokens: int = 4000,
     ) -> None:
         self.retriever = retriever
         self.llm = llm
-        self.pricing = pricing or Pricing()
         # A stronger (slower, pricier) model tried once when the primary cannot produce a verified
         # answer although evidence exists. Only hard questions pay for it.
         self.escalation = escalation
@@ -150,7 +174,17 @@ class AnswerService:
     ) -> Answer:
         t0 = time.perf_counter()
         now = now or self.retriever.clock()
-        r = self.retriever.retrieve(question, now=now, language=language)
+        with collect_calls() as calls:
+            r = self.retriever.retrieve(question, now=now, language=language)
+            answer = self._respond(question, r, now, t0, allow_llm)
+        apply_calls(answer, calls)
+        answer.sources = [_source(e) for e in select_evidence(r.evidence, _MAX_EVIDENCE)]
+        answer.latency_ms |= {f"retrieve_{k}": round(v, 1) for k, v in r.timings_ms.items() if k != "total"}
+        return answer
+
+    def _respond(
+        self, question: str, r: RetrievalResult, now: datetime, t0: float, allow_llm: bool
+    ) -> Answer:
         lang = r.route.language.code
         route = f"{r.route.intent.value}/{r.route.mode.value}"
         base = {"question": question, "language": lang, "route": route}
@@ -223,24 +257,29 @@ class AnswerService:
                 reason="no LLM configured" if self.llm is None else "daily LLM budget reached",
                 citations=[_citation(e) for e in evidence],
             )
-        first = self._llm_answer(question, r, evidence, now, base, timings, t0, self.llm, 700)
-        if first.abstained and self.escalation is not None and "unavailable" not in first.reason:
+        with call_purpose("answer"):
+            first = self._llm_answer(question, r, evidence, now, base, timings, t0, self.llm, 700)
+        if (
+            first.abstained
+            and self.escalation is not None
+            and "unavailable" not in first.reason
+            # The primary chain already fell through to the escalation model (e.g. Sarvam out of credits).
+            and first.model not in _models(self.escalation)
+        ):
             log.info("answer.escalate", reason=first.reason)
-            second = self._llm_answer(
-                question,
-                r,
-                evidence,
-                now,
-                base,
-                dict(timings),
-                t0,
-                self.escalation,
-                self.escalation_max_tokens,
-                attempts=1,
-            )
-            second.prompt_tokens += first.prompt_tokens
-            second.completion_tokens += first.completion_tokens
-            second.cost_inr = round(second.cost_inr + first.cost_inr, 5)
+            with call_purpose("escalation"):
+                second = self._llm_answer(
+                    question,
+                    r,
+                    evidence,
+                    now,
+                    base,
+                    dict(timings),
+                    t0,
+                    self.escalation,
+                    self.escalation_max_tokens,
+                    attempts=1,
+                )
             if second.abstained:
                 second.reason = f"{first.reason}; escalated: {second.reason}"
             return second
@@ -268,7 +307,8 @@ class AnswerService:
         problems: list[str] = []
         for attempt in range(attempts):
             try:
-                res = llm.complete(messages, max_tokens=max_tokens, temperature=0.1, json=True)
+                with call_purpose("answer_retry") if attempt else nullcontext():
+                    res = llm.complete(messages, max_tokens=max_tokens, temperature=0.1, json=True)
             except LLMError as exc:
                 log.warning("answer.llm_failed", error=str(exc), quota=exc.quota)
                 return self._done(
@@ -391,7 +431,7 @@ class AnswerService:
             model=model,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
-            cost_inr=self.pricing.cost(prompt_tokens, completion_tokens),
+            cost_inr=0.0,  # filled from the recorded calls (apply_calls)
             latency_ms=timings,
         )
 

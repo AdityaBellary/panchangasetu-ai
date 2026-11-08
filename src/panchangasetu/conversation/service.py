@@ -7,14 +7,17 @@ cannot leak into a later one: every answer is still grounded only in retrieved s
 
 from __future__ import annotations
 
+import time
 from dataclasses import asdict, replace
 from datetime import datetime, timedelta
 
 from panchangasetu.conversation.followup import FollowUpResolver
 from panchangasetu.conversation.store import SessionNotFound, SessionStore, TurnRecord
-from panchangasetu.generation.answerer import Answer, AnswerService
+from panchangasetu.generation.answerer import Answer, AnswerService, apply_calls
+from panchangasetu.observability.calls import call_purpose, collect_calls
+from panchangasetu.observability.context import request_id_var
 from panchangasetu.observability.logging import get_logger
-from panchangasetu.observability.metrics import record_answer
+from panchangasetu.observability.metrics import record_answer, record_budget
 from panchangasetu.query.language import detect_language
 
 log = get_logger(__name__)
@@ -40,11 +43,13 @@ class ConversationService:
         # (calendar lookups) cost nothing and keep working once the budget is used up.
         self.daily_budget_inr = daily_budget_inr
 
+    def spent_today(self, now: datetime) -> float:
+        return self.store.spent_since(now.replace(hour=0, minute=0, second=0, microsecond=0))
+
     def llm_allowed(self, now: datetime) -> bool:
-        if self.daily_budget_inr <= 0:
-            return True
-        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        return self.store.spent_since(midnight) < self.daily_budget_inr
+        spent = self.spent_today(now)
+        record_budget(self.daily_budget_inr, spent)
+        return self.daily_budget_inr <= 0 or spent < self.daily_budget_inr
 
     def start(self, owner: str | None = None) -> str:
         return self.store.create(owner)
@@ -71,18 +76,24 @@ class ConversationService:
             if now - t.asked_at <= self.idle
         ]
         allow_llm = self.llm_allowed(now)
-        res = self.resolver.resolve(question, history, now, allow_llm=allow_llm)
-        language = detect_language(question) if res.method != "none" else None
-        answer = self.answers.ask(res.question, now=now, language=language, allow_llm=allow_llm)
-        rewrite_in, rewrite_out = self.resolver.last_cost_tokens
-        if rewrite_in or rewrite_out:
-            answer.prompt_tokens += rewrite_in
-            answer.completion_tokens += rewrite_out
-            answer.cost_inr = round(answer.cost_inr + self.answers.pricing.cost(rewrite_in, rewrite_out), 5)
+        t0 = time.perf_counter()
+        with collect_calls() as calls:
+            with call_purpose("followup_rewrite"):
+                res = self.resolver.resolve(question, history, now, allow_llm=allow_llm)
+            rewrite_ms = (time.perf_counter() - t0) * 1000
+            language = detect_language(question) if res.method != "none" else None
+            answer = self.answers.ask(res.question, now=now, language=language, allow_llm=allow_llm)
+        for c in calls:  # spend is booked at the turn's time, the clock the daily budget uses
+            c.at = now
+        apply_calls(answer, calls)  # the rewrite's call counts towards this answer's cost
+        answer.latency_ms["rewrite"] = round(rewrite_ms, 1)
+        answer.latency_ms["total"] = round((time.perf_counter() - t0) * 1000, 1)
         answer.question = question
         answer.standalone_question = res.question
         answer.session_id = session_id
         record_answer(answer, res.method)
+        if answer.cost_inr:
+            record_budget(self.daily_budget_inr, self.spent_today(now) + answer.cost_inr)
         # One line per answer for dashboards and debugging; the question itself is not logged.
         log.info(
             "answer.done",
@@ -94,6 +105,9 @@ class ConversationService:
             reason=answer.reason[:120] or None,
             rewrite=res.method,
             model=answer.model,
+            llm_calls=len(answer.llm_calls),
+            prompt_tokens=answer.prompt_tokens,
+            completion_tokens=answer.completion_tokens,
             cost_inr=answer.cost_inr,
             latency_ms=round(answer.latency_ms.get("total", 0.0), 1),
             question_chars=len(question),
@@ -114,6 +128,13 @@ class ConversationService:
                 model=answer.model,
                 cost_inr=answer.cost_inr,
                 latency_ms=answer.latency_ms.get("total", 0.0),
+                request_id=request_id_var.get(),
+                prompt_tokens=answer.prompt_tokens,
+                completion_tokens=answer.completion_tokens,
+                reason=answer.reason,
+                timings={k: round(v, 1) for k, v in answer.latency_ms.items()},
+                sources=answer.sources,
+                llm_calls=answer.llm_calls,
             ),
         )
         return answer

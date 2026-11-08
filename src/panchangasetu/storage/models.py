@@ -8,7 +8,7 @@ ingestion_runs     audit trail + stats for each pipeline execution
 chat_sessions      conversations (Phase 6)
 chat_turns         questions, their standalone rewrites and answers
 api_keys           API clients (hashed keys, Phase 7)
-llm_spend          append-only LLM spend ledger (daily budget, Phase 8)
+llm_calls          every LLM call: tokens, cost, latency, outcome (append-only; daily budget)
 """
 
 from __future__ import annotations
@@ -297,6 +297,13 @@ class ChatTurn(Base):
     latency_ms: Mapped[float] = mapped_column(Float, default=0.0)
     asked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # Observability (trace view): request id, tokens, why it abstained, stage timings, sources shown.
+    request_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    prompt_tokens: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    completion_tokens: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    reason: Mapped[str] = mapped_column(Text, default="", server_default="")
+    timings: Mapped[dict[str, Any]] = mapped_column(default=dict, server_default="{}")
+    sources: Mapped[list[Any]] = mapped_column(default=list, server_default="[]")
 
 
 class ApiKey(Base):
@@ -309,18 +316,36 @@ class ApiKey(Base):
     prefix: Mapped[str] = mapped_column(String(16), index=True)  # first characters, to identify a key
     key_hash: Mapped[str] = mapped_column(String(64), unique=True)
     rate_limit_per_minute: Mapped[int | None] = mapped_column(Integer)  # None: the server default
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )  # monitoring access
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
-class LlmSpend(Base):
-    """Append-only LLM spend ledger for the daily budget. Kept apart from chat_turns so that deleting
-    or pruning conversations can never lower the day's recorded spend."""
+class LlmCallRecord(Base):
+    """One LLM HTTP call (retries and fallbacks included): the source of truth for spend, tokens and
+    provider latency. Append-only: deleting a conversation keeps its calls (turn_id becomes NULL), so
+    cost history and the daily budget can't be reset by deleting sessions."""
 
-    __tablename__ = "llm_spend"
+    __tablename__ = "llm_calls"
+    __table_args__ = (Index("ix_llm_calls_at", "at"),)
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    spent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
-    cost_inr: Mapped[float] = mapped_column(Float)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    turn_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("chat_turns.id", ondelete="SET NULL"), index=True
+    )
+    session_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     owner: Mapped[str | None] = mapped_column(String(128))
+    request_id: Mapped[str | None] = mapped_column(String(32))
+    purpose: Mapped[str] = mapped_column(String(32))  # answer | answer_retry | escalation | followup_rewrite
+    provider: Mapped[str] = mapped_column(String(32))
+    model: Mapped[str] = mapped_column(String(128))
+    prompt_tokens: Mapped[int] = mapped_column(Integer)
+    completion_tokens: Mapped[int] = mapped_column(Integer)
+    cost_inr: Mapped[float] = mapped_column(Float)
+    latency_ms: Mapped[float] = mapped_column(Float)
+    status: Mapped[str] = mapped_column(String(16))  # ok | error | quota
+    error: Mapped[str] = mapped_column(Text, default="")

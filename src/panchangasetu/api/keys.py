@@ -31,6 +31,7 @@ class Client:
     id: str
     name: str
     rate_limit_per_minute: int | None
+    is_admin: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,13 +42,16 @@ class KeyInfo:
     created_at: datetime
     last_used_at: datetime | None
     revoked_at: datetime | None
+    is_admin: bool = False
 
 
 class ApiKeyStore:
     def __init__(self, factory: sessionmaker[Session]) -> None:
         self.factory = factory
 
-    def create(self, name: str, *, rate_limit_per_minute: int | None = None) -> tuple[str, KeyInfo]:
+    def create(
+        self, name: str, *, rate_limit_per_minute: int | None = None, admin: bool = False
+    ) -> tuple[str, KeyInfo]:
         """Returns (the key, its record). The key cannot be recovered later."""
         key = new_key()
         with session_scope(self.factory) as s:
@@ -56,6 +60,7 @@ class ApiKeyStore:
                 prefix=key[: len(KEY_PREFIX) + 6],
                 key_hash=hash_key(key),
                 rate_limit_per_minute=rate_limit_per_minute,
+                is_admin=admin,
             )
             s.add(row)
             s.flush()
@@ -71,7 +76,7 @@ class ApiKeyStore:
             now = utcnow()
             if row.last_used_at is None or now - _aware(row.last_used_at) > _LAST_USED_RESOLUTION:
                 row.last_used_at = now
-            return Client(str(row.id), row.name, row.rate_limit_per_minute)
+            return Client(str(row.id), row.name, row.rate_limit_per_minute, row.is_admin)
 
     def list(self) -> list[KeyInfo]:
         with session_scope(self.factory) as s:
@@ -91,4 +96,4 @@ def _aware(dt: datetime) -> datetime:
 
 
 def _info(r: ApiKey) -> KeyInfo:
-    return KeyInfo(str(r.id), r.name, r.prefix, r.created_at, r.last_used_at, r.revoked_at)
+    return KeyInfo(str(r.id), r.name, r.prefix, r.created_at, r.last_used_at, r.revoked_at, r.is_admin)

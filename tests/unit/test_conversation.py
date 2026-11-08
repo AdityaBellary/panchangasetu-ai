@@ -19,6 +19,7 @@ from panchangasetu.conversation.store import (
 )
 from panchangasetu.core.interfaces import LLMError
 from panchangasetu.generation.answerer import AnswerService
+from panchangasetu.observability.calls import LlmCall
 from panchangasetu.query.router import Intent, PanchangaMode
 from panchangasetu.storage.models import Base
 from tests.unit.test_generation import PROSE, FakeLLM, FakeRetriever, reply
@@ -203,9 +204,13 @@ def test_spend_and_pruning(make: type) -> None:
     store = make()
     old, new = store.create(), store.create()
     t_old = turn("old")
-    t_old.asked_at, t_old.cost_inr = NOW - timedelta(days=200), 0.5
+    t_old.asked_at = NOW - timedelta(days=200)
+    t_old.llm_calls = [LlmCall("answer", "sarvam", "m", 100, 10, 0.5, 300.0, "ok", at=t_old.asked_at)]
     t_new = turn("new")
-    t_new.cost_inr = 0.25
+    t_new.llm_calls = [
+        LlmCall("answer", "sarvam", "m", 100, 10, 0.2, 300.0, "ok", at=NOW),
+        LlmCall("answer_retry", "sarvam", "m", 50, 5, 0.05, 200.0, "ok", at=NOW),
+    ]
     store.add_turn(old, t_old)
     store.add_turn(new, t_new)
     assert store.spent_since(NOW - timedelta(hours=1)) == pytest.approx(0.25)

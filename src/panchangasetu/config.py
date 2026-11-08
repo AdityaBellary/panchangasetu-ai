@@ -10,7 +10,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 OCREngineName = Literal["sarvam", "tesseract"]
@@ -55,6 +55,10 @@ class Settings(BaseSettings):
 
     sarvam_api_key: SecretStr | None = Field(default=None, validation_alias="SARVAM_API_KEY")
     openai_api_key: SecretStr | None = Field(default=None, validation_alias="OPENAI_API_KEY")
+    # Google AI Studio key (Gemini); GOOGLE_API_KEY is accepted too.
+    gemini_api_key: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY")
+    )
     sarvam_doc_language: str = "te-IN"
     sarvam_doc_content_type: Literal["printed", "handwritten", "mixed"] = "printed"
     sarvam_poll_interval_s: float = Field(3.0, gt=0)
@@ -94,12 +98,23 @@ class Settings(BaseSettings):
 
     # --- answer generation ---
     # Providers tried in order; out-of-credits or outages fall through to the next one.
-    llm_providers: list[Literal["sarvam", "openai"]] = ["sarvam", "openai"]
+    llm_providers: list[Literal["sarvam", "gemini", "openai"]] = ["sarvam", "gemini", "openai"]
     sarvam_chat_model: str = "sarvam-105b-conversations"  # no reasoning: fast, cheap (Phase 5 probe)
     openai_chat_model: str = "gpt-4.1-mini"
-    # Tried once when the primary cannot produce a verified answer (hard list lookups, complex rules).
-    # "" disables escalation. sarvam-105b reasons: ~20 s and ~₹0.3 per escalated answer (Phase 5 probe).
-    escalation_model: str = ""  # off by default: on large prompts sarvam-105b needs >4k reasoning tokens
+    # gemini-3.8-flash is the newest Flash but was overloaded (503 "high demand") on 2026-11-08; 3.6 is the
+    # same price and answered in ~2 s. Switch back with PSETU_GEMINI_CHAT_MODEL once 3.8 is stable.
+    gemini_chat_model: str = "gemini-3.6-flash"
+    gemini_reasoning_effort: str = "low"  # Gemini 3 always thinks; this keeps it (and its cost) small
+    # Tried in order when the main Gemini model is overloaded or failing.
+    gemini_fallback_models: list[str] = ["gemini-3.5-flash-lite"]
+    llm_pricing_path: Path = Path("config/llm_pricing.yaml")
+    # Tried once when the primary cannot produce a verified answer although sources were found (hard
+    # list lookups, complex rules). Gemini answered 16/19 held-out questions to Sarvam's 13 at ~4.5x the
+    # cost (docs/llm-models.md), so only those questions pay for it. "" disables escalation.
+    escalation_provider: Literal["", "gemini", "openai", "sarvam"] = "gemini"
+    # Used when escalation_provider is "sarvam": reasons, ~20 s and ~₹0.3 per answer, and on large
+    # prompts needs >4k reasoning tokens (Phase 5 probe).
+    escalation_model: str = "sarvam-105b"
     llm_timeout_s: float = Field(60.0, gt=0)
 
     # --- conversations ---
