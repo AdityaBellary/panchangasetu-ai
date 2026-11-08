@@ -22,35 +22,7 @@ Is tomorrow good for a business?  → the book has no rule for that, so here is 
 
 ## How it works
 
-```mermaid
-flowchart LR
-    subgraph Ingest["1 · Ingest (once per PDF)"]
-        PDF["TTD PDFs<br/>data/raw/"] --> OCR["OCR<br/>Sarvam Vision,<br/>Tesseract fallback"]
-        OCR --> Pages["Pages, sections<br/>and chunks"]
-        OCR --> Tables["Daily panchangam<br/>and festival tables"]
-        Pages --> Embed["Embeddings<br/>multilingual-e5, local"]
-    end
-
-    subgraph Store["Storage"]
-        PG[("Postgres<br/>days, festivals,<br/>chats, LLM calls")]
-        QD[("Qdrant<br/>book passages")]
-    end
-
-    Tables --> PG
-    Embed --> QD
-
-    subgraph Ask["2 · Answer a question"]
-        Q["Question<br/>Telugu or English"] --> Route["Router<br/>dates, tithis, topics"]
-        Route -->|"calendar"| Lookup["Table lookup"] --> Tmpl["Template answer<br/>free, instant"]
-        Route -->|"anything else"| Search["Search passages"] --> LLM["Sarvam<br/>(Gemini if needed)"]
-        LLM --> Check["Checker: every date,<br/>time and quote is in<br/>the cited pages"]
-        Check -->|"passes"| Ans["Answer + pages"]
-        Check -->|"fails"| Refuse["Polite refusal<br/>(+ the day's panchangam)"]
-    end
-
-    PG -.-> Lookup
-    QD -.-> Search
-```
+![How PanchangaSetu works: PDFs are read once into Postgres tables and a Qdrant index; each question is routed to a table lookup or a passage search, answered, and checked before it is shown](assets/architecture.webp)
 
 | Part | What it does | Where |
 |---|---|---|
