@@ -13,3 +13,4 @@ htmlcov/
 # Only the monitoring guide is published; other docs stay local.
 docs/*
 !docs/monitoring.md
+.env.deploy

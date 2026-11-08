@@ -166,6 +166,39 @@ docker compose exec api psetu api-keys create family
 Give Docker at least 6 GB of memory. `./data` is mounted into the container, so PDFs, the OCR cache and the
 models are shared with a local install.
 
+## Hosting on Hugging Face (free)
+
+The public deployment runs on a free Hugging Face Docker Space. Space storage is wiped on restart, so the data
+lives in two free services: Postgres on [Neon](https://neon.tech) and the search index on
+[Qdrant Cloud](https://cloud.qdrant.io). Page images sit in a private Hugging Face dataset that the Space
+downloads at startup.
+
+```mermaid
+flowchart LR
+    Phone["Phone / browser"] -->|HTTPS| Space["HF Space<br/>app + embedding model"]
+    Space --> Neon[("Neon Postgres")]
+    Space --> Qdrant[("Qdrant Cloud")]
+    Space -.->|startup| Pages[("Private HF dataset<br/>page images")]
+    GH["GitHub: merge to main"] -->|"ci passes → deploy workflow"| Space
+```
+
+Each merge to `main` is deployed by `.github/workflows/deploy.yml`, after CI passes on that commit. The
+workflow uploads the app and `deploy/huggingface/` (Dockerfile, start script, Space README) to the Space,
+sets its secrets, and waits until `/healthz` answers. Secrets and the Space name live in the repository's
+`huggingface` environment (only `main` can deploy). You can also run it by hand from the Actions tab.
+
+One-time setup of the hosted data, from a machine that has already ingested the PDFs (reads `.env.deploy`;
+see the script's docstring):
+
+```bash
+uv run python deploy/huggingface/seed_data.py database   # local Postgres -> Neon (no chats or keys)
+uv run python deploy/huggingface/seed_data.py index      # passages -> Qdrant Cloud (local embeddings, free)
+uv run python deploy/huggingface/seed_data.py pages      # page images -> private HF dataset
+```
+
+Then create API keys against the hosted database, e.g.
+`PSETU_DATABASE_URL=<neon url with postgresql+psycopg://> uv run psetu api-keys create family`.
+
 ## Monitoring
 
 ```bash
