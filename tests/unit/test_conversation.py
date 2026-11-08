@@ -217,6 +217,7 @@ def test_spend_and_pruning(make: type) -> None:
         assert store.prune(datetime.now(UTC) - timedelta(days=1)) == 0
         assert store.prune(datetime.now(UTC) + timedelta(days=1)) == 2
         assert not store.exists(old) and not store.exists(new)
+    assert store.spent_since(NOW - timedelta(days=365)) == pytest.approx(0.75)  # ledger survives pruning
 
 
 def test_daily_budget_stops_llm_answers_but_not_calendar_templates() -> None:
@@ -229,6 +230,10 @@ def test_daily_budget_stops_llm_answers_but_not_calendar_templates() -> None:
     assert first.method == "llm" and first.cost_inr >= 0.02
     second = svc.ask("What is Kuja dosha?", now=NOW + timedelta(minutes=1))
     assert second.abstained and second.answer == BUDGET_EN and llm.calls == 1
+    # Deleting the conversation must not refund the day's spend.
+    assert svc.store.delete(first.session_id or "")
+    third = svc.ask("What is Kuja dosha?", now=NOW + timedelta(minutes=2))
+    assert third.answer == BUDGET_EN and llm.calls == 1
     tomorrow = svc.ask("What is Kuja dosha?", now=NOW + timedelta(days=1))
     assert tomorrow.method == "llm"
 

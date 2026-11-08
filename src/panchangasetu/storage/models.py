@@ -8,6 +8,7 @@ ingestion_runs     audit trail + stats for each pipeline execution
 chat_sessions      conversations (Phase 6)
 chat_turns         questions, their standalone rewrites and answers
 api_keys           API clients (hashed keys, Phase 7)
+llm_spend          append-only LLM spend ledger (daily budget, Phase 8)
 """
 
 from __future__ import annotations
@@ -311,3 +312,15 @@ class ApiKey(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class LlmSpend(Base):
+    """Append-only LLM spend ledger for the daily budget. Kept apart from chat_turns so that deleting
+    or pruning conversations can never lower the day's recorded spend."""
+
+    __tablename__ = "llm_spend"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    spent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    cost_inr: Mapped[float] = mapped_column(Float)
+    owner: Mapped[str | None] = mapped_column(String(128))

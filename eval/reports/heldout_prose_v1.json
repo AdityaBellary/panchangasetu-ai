@@ -1,0 +1,440 @@
+{
+  "summary": {
+    "answer_accuracy": 0.684,
+    "abstention_accuracy": 1.0,
+    "hallucinated_answers_on_negatives": 0,
+    "false_abstentions": 5,
+    "language_match": 1.0,
+    "methods": {
+      "template": 0,
+      "llm": 14,
+      "abstain": 9
+    },
+    "total_cost_inr": 1.406,
+    "median_latency_ms": 535,
+    "p95_latency_ms": 1333,
+    "by_kind": {
+      "about": "0/2",
+      "forecast": "4/4",
+      "negative": "4/4",
+      "rasi": "4/5",
+      "rule": "2/3",
+      "stotra": "2/2",
+      "table": "1/3"
+    },
+    "by_lang": {
+      "en": "9/13",
+      "te": "8/10"
+    }
+  },
+  "results": [
+    {
+      "id": "pr01",
+      "kind": "rule",
+      "lang": "en",
+      "q": "Which nakshatras are called adhomukha nakshatras?",
+      "expect": "answer",
+      "correct": false,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [
+        [
+          "భరణి",
+          "Bharani"
+        ],
+        [
+          "మఘ",
+          "Magha"
+        ]
+      ],
+      "cost_inr": 0.02806,
+      "latency_ms": 1309,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
+    },
+    {
+      "id": "pr02",
+      "kind": "rasi",
+      "lang": "te",
+      "q": "వృశ్చిక రాశి రైతులకు ఈ సంవత్సరం ఎలా ఉంటుంది?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.04215,
+      "latency_ms": 535,
+      "answer": "ఈ సంవత్సరం వృశ్చిక రాశి రైతులకు పంటలు కలసివస్తాయని తెలుపుతోంది. వ్యవసాయ, అనుబంధ పరిశ్రమలు మరియు యాంత్రిక పరిశ్రమల వారికి ఆదాయ మార్గాలు పెరుగుతాయని లో పేర్కొనబడింది."
+    },
+    {
+      "id": "pr03",
+      "kind": "forecast",
+      "lang": "en",
+      "q": "On which dates are rains expected in Chaitra masam?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.04475,
+      "latency_ms": 469,
+      "answer": "Rains are expected in Chaitra masam (19-03-2026 to 17-04-2026) on March 28, 29, 30, and on April 11, 12, 13."
+    },
+    {
+      "id": "pr04",
+      "kind": "table",
+      "lang": "en",
+      "q": "What latitude (akshamsha) does the panchangam use for Tirupati?",
+      "expect": "answer",
+      "correct": false,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [
+        [
+          "13.44",
+          "13-44",
+          "13°44"
+        ]
+      ],
+      "cost_inr": 0.04861,
+      "latency_ms": 350,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
+    },
+    {
+      "id": "pr06",
+      "kind": "rasi",
+      "lang": "en",
+      "q": "For Mesha rasi, where does Jupiter transit after June 2 and is it good?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.04245,
+      "latency_ms": 470,
+      "answer": "For Mesha rasi, after June 2, Jupiter transits in the fourth position (చతుర్థ స్థానమందు) as a silver idol (రజితమూర్తిగా) and gives auspicious results (సౌభాగ్యకరమైన ఫలితముల నిచ్చును)."
+    },
+    {
+      "id": "pr07",
+      "kind": "forecast",
+      "lang": "te",
+      "q": "కార్తీక మాసంలో బంగారం ధరలు ఎలా ఉంటాయి?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.05568,
+      "latency_ms": 618,
+      "answer": "కార్తీక మాసంలో (10-11-2026 నుండి 08-12-2026 వరకు) బంగారము ధరలు హెచ్చును."
+    },
+    {
+      "id": "pr08",
+      "kind": "stotra",
+      "lang": "en",
+      "q": "What are the benefits of reciting the Suryashtakam daily?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.07338,
+      "latency_ms": 674,
+      "answer": "According to the source, reciting the Suryashtakam daily destroys the afflictions of planets. It also grants a son to one who is childless and makes a poor person wealthy."
+    },
+    {
+      "id": "pr09",
+      "kind": "table",
+      "lang": "te",
+      "q": "గౌరీ పంచాంగం ప్రకారం సోమవారం పగటి మొదటి ముహూర్తం ఏమిటి?",
+      "expect": "answer",
+      "correct": false,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [
+        [
+          "అమృతం"
+        ]
+      ],
+      "cost_inr": 0.05056,
+      "latency_ms": 404,
+      "answer": "గౌరీ పంచాంగం ప్రకారం సోమవారం పగటి మొదటి ముహూర్తం ఉద్యోగం."
+    },
+    {
+      "id": "pr10",
+      "kind": "rasi",
+      "lang": "en",
+      "q": "What health problems should Dhanus rasi people be careful about this year?",
+      "expect": "answer",
+      "correct": false,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "answer failed verification: date 2026-01-20 is not in the cited sources",
+      "missing": [
+        [
+          "head",
+          "nerve",
+          "తల"
+        ],
+        [
+          "chest",
+          "ఛాతీ"
+        ]
+      ],
+      "cost_inr": 0.1044,
+      "latency_ms": 1470,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
+    },
+    {
+      "id": "pr11",
+      "kind": "table",
+      "lang": "te",
+      "q": "కర్కాటక రాశి వారికి ఆదాయం, వ్యయం ఎంత?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.03902,
+      "latency_ms": 369,
+      "answer": "కర్కాటక రాశి వారికి ఆదాయం 02 మరియు వ్యయం 11 అని మూలాలు సూచిస్తున్నాయి."
+    },
+    {
+      "id": "pr12",
+      "kind": "stotra",
+      "lang": "en",
+      "q": "Why is the verse 'Shuklambaradharam Vishnum' recited?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.06527,
+      "latency_ms": 469,
+      "answer": "The verse 'Shuklambaradharam Vishnum' is recited for the pacification of all obstacles. This is stated in the introductory section of the document."
+    },
+    {
+      "id": "pr13",
+      "kind": "rule",
+      "lang": "te",
+      "q": "మనుష్య గణం, రాక్షస గణం వారికి వివాహం చేయవచ్చా?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.07333,
+      "latency_ms": 866,
+      "answer": "అవును, వివాహము చేయవచ్చు. మానవుడు (మనుష్య), రాక్షస గణముల వారికి వివాహము చేయవచ్చునని ప్రమాణములు ఉన్నాయి. ఏకగణం శుభం. దేవ రాక్షస గణములు వైరం - రాక్షస మనుష్యగణములు మరణము “మనుష్య రాక్షసయోః వివాహః నకార్యః”."
+    },
+    {
+      "id": "pr14",
+      "kind": "rasi",
+      "lang": "en",
+      "q": "What does the Makara rasi forecast say for August?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.0438,
+      "latency_ms": 583,
+      "answer": "For Makara rasi in August, there are indications of some legal problems and obstacles. Health should be taken care of, with possible trouble from indigestion, blood circulation issues, and piles. One should also be careful while driving or walking."
+    },
+    {
+      "id": "pr15",
+      "kind": "forecast",
+      "lang": "te",
+      "q": "ఆశ్వయుజ మాసంలో వర్షాలు ఏ తేదీలలో పడతాయి?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.05752,
+      "latency_ms": 620,
+      "answer": "ఆశ్వయుజ మాసంలో వర్షాలు నవంబర్ 2, 3, 4 తేదీలలో పడతాయి. అలాగే అక్టోబర్ 19, 20, 21 తేదీలలో కూడా వర్షములు పడతాయని తెలుపుతున్నది."
+    },
+    {
+      "id": "pr16",
+      "kind": "about",
+      "lang": "en",
+      "q": "Which family prepares this panchangam and where are they from?",
+      "expect": "answer",
+      "correct": false,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [
+        [
+          "Relangi",
+          "రేలంగి"
+        ]
+      ],
+      "cost_inr": 0.04113,
+      "latency_ms": 323,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
+    },
+    {
+      "id": "pr17",
+      "kind": "rule",
+      "lang": "te",
+      "q": "ఏల్నాటి శని ఎన్ని సంవత్సరాలు ఉంటుంది?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.08582,
+      "latency_ms": 667,
+      "answer": "ఏల్నాటి శని మొత్తం 7½ సంవత్సరాలు ఉంటుంది. ఇది ఒక్కొక్క రాశిలో 2½ సంవత్సరాలు చొప్పున సంచరిస్తుంది."
+    },
+    {
+      "id": "pr18",
+      "kind": "rasi",
+      "lang": "en",
+      "q": "What is the July forecast for Vrishabha rasi?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.04788,
+      "latency_ms": 719,
+      "answer": "According to the TTD panchangam, the July forecast for Vrishabha rasi indicates social recognition, special income for those in real estate, motor, and mechanical professions, good recognition for political figures, improvement in the mother's health, and financial gains for businessmen. Additionally, Saturn's retrograde from the end of July until the beginning of December causes a decrease in financial benefits."
+    },
+    {
+      "id": "pr19",
+      "kind": "forecast",
+      "lang": "en",
+      "q": "When will it rain in Magha masam?",
+      "expect": "answer",
+      "correct": true,
+      "language_ok": true,
+      "method": "llm",
+      "abstained": false,
+      "reason": "",
+      "missing": [],
+      "cost_inr": 0.11337,
+      "latency_ms": 1594,
+      "answer": "During Magha masam (07-02-2027 to 08-03-2027), rain is indicated by Chandrayogams on February 7, 19, 20, and 21; between February 21 and March 4 due to Jala nakshatram and Jala nadi transit of Shukra; and on March 4, 5, 6, and 7. There is also a forecast of scant showers at the end of the month."
+    },
+    {
+      "id": "pr20",
+      "kind": "about",
+      "lang": "te",
+      "q": "బ్రహ్మ యొక్క పరమాయుః ఎంత?",
+      "expect": "answer",
+      "correct": false,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "answer failed verification: number 100 is not in the cited sources",
+      "missing": [
+        [
+          "100",
+          "శత",
+          "వంద"
+        ]
+      ],
+      "cost_inr": 0.1432,
+      "latency_ms": 1333,
+      "answer": "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు."
+    },
+    {
+      "id": "pn01",
+      "kind": "negative",
+      "lang": "en",
+      "q": "What is the price of a special darshan ticket at Tirumala?",
+      "expect": "abstain",
+      "correct": true,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [],
+      "cost_inr": 0.04692,
+      "latency_ms": 315,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
+    },
+    {
+      "id": "pn02",
+      "kind": "negative",
+      "lang": "te",
+      "q": "తిరుమల లడ్డూ ధర ఎంత?",
+      "expect": "abstain",
+      "correct": true,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [],
+      "cost_inr": 0.04711,
+      "latency_ms": 345,
+      "answer": "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు."
+    },
+    {
+      "id": "pn03",
+      "kind": "negative",
+      "lang": "en",
+      "q": "How many steps are there on the Alipiri footpath to Tirumala?",
+      "expect": "abstain",
+      "correct": true,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [],
+      "cost_inr": 0.05121,
+      "latency_ms": 368,
+      "answer": "I don't have enough information in the available documents to answer this question accurately."
+    },
+    {
+      "id": "pn04",
+      "kind": "negative",
+      "lang": "te",
+      "q": "అన్నమయ్య ఎన్ని కీర్తనలు రాశారు?",
+      "expect": "abstain",
+      "correct": true,
+      "language_ok": true,
+      "method": "abstain",
+      "abstained": true,
+      "reason": "model judged the sources insufficient",
+      "missing": [],
+      "cost_inr": 0.06082,
+      "latency_ms": 392,
+      "answer": "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు."
+    }
+  ]
+}

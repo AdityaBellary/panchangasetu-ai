@@ -99,8 +99,17 @@ _TE_ORDINALS = {
 }  # fmt: skip
 
 
+# Large round numbers are usually written as words in the book ("వర్ష శతమేవ" = 100 years).
+_TE_CARDINALS = {"శత": 100, "వంద": 100, "నూరు": 100, "సహస్ర": 1000, "వెయ్యి": 1000, "లక్ష": 100_000, "కోటి": 10**7}
+
+
 def telugu_ordinals_in(text: str) -> set[int]:
-    return {n for word, n in _TE_ORDINALS.items() if word in text}
+    return {n for word, n in (_TE_ORDINALS | _TE_CARDINALS).items() if word in text}
+
+
+def _without_dates(text: str) -> str:
+    """Dates removed, so "2027-01-15" or "15-01-2027" can't be read as the time 01:15."""
+    return _DMY_RE.sub(" ", _ISO_DATE_RE.sub(" ", text))
 
 
 def check_answer(answer: str, cited_texts: list[str], *, default_year: int) -> list[str]:
@@ -115,9 +124,9 @@ def check_answer(answer: str, cited_texts: list[str], *, default_year: int) -> l
         if n > 1:  # "1" is too common in prose ("one of", list markers) to be a useful signal
             problems.append(f"number {n} is not in the cited sources")
     source_minutes: set[int] = set()
-    for _, variants in times_in(source):
+    for _, variants in times_in(_without_dates(source)):
         source_minutes |= variants
-    for raw, variants in times_in(answer):
+    for raw, variants in times_in(_without_dates(answer)):
         if not variants & source_minutes:
             problems.append(f"time '{raw}' is not in the cited sources")
     source_dates = dates_in(source, default_year) | dates_in(source, default_year + 1)

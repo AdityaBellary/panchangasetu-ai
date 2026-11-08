@@ -331,3 +331,10 @@ def test_evidence_selection_keeps_exact_facts_and_mixes_collections() -> None:
 def test_citation_lead_ins_are_removed_with_their_markers() -> None:
     assert strip_citation_markers("According to [S1], the months are Magha.") == "The months are Magha."
     assert strip_citation_markers("Magha is good (S2).") == "Magha is good."
+
+
+def test_dates_are_not_read_as_times_and_number_words_count() -> None:
+    src = "తేది. 15-01-2027 శుక్రవారం మకర సంక్రాంతి. బ్రహ్మణః పరమాయుః వర్ష శతమేవ"
+    assert check_answer("Makara Sankranti is on 2027-01-15 (15-01-2027).", [src], default_year=2027) == []
+    assert check_answer("Brahma's lifespan is 100 years.", [src], default_year=2027) == []
+    assert check_answer("Brahma's lifespan is 120 years.", [src], default_year=2027) != []

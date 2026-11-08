@@ -117,3 +117,23 @@ def test_query_expansion_adds_telugu_terms_for_english_only() -> None:
     assert expand_query(te, detect_language(te), extract_slots(te), glossary) == te
     nxt = "When is the next Ekadashi?"
     assert "ఏకాదశి" in expand_query(nxt, detect_language(nxt), extract_slots(nxt), glossary)
+
+
+def test_telugu_day_month_year_is_not_misread_as_month_day() -> None:
+    from datetime import date
+
+    from panchangasetu.query.dates import parse_dates
+
+    for text, expected in [
+        ("27 మార్చి 2027 తిథి ఏది?", date(2027, 3, 27)),
+        ("2 జూలై 2026 న తిథి ఏమిటి?", date(2026, 7, 2)),
+        ("డిసెంబర్ 5, 2026 తిథి", date(2026, 12, 5)),
+    ]:
+        assert [s.start for s in parse_dates(text, date(2026, 11, 7))] == [expected]
+
+
+def test_month_and_festival_names_are_not_mistaken_for_nakshatra_or_rasi() -> None:
+    assert extract_slots("When will it rain in Magha masam?").nakshatra is None
+    assert extract_slots("Why is Makara Sankranti on 15 January?").rasi is None
+    assert extract_slots("మకర సంక్రాంతి ఎప్పుడు?").rasi is None
+    assert extract_slots("What are the predictions for Makara rasi?").rasi == "మకర"

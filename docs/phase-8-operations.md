@@ -3,7 +3,8 @@
 Status: **implemented, awaiting approval**  ·  Date: 2026-11-07
 
 ## 1. Observability
-**Metrics:** `GET /metrics` (Prometheus format). Set `PSETU_API_METRICS_TOKEN` to require a bearer token.
+**Metrics:** `GET /metrics` (Prometheus format). Without `PSETU_API_METRICS_TOKEN` only loopback clients may read it
+(403 otherwise); with it, scrapers must send the token as a bearer token (compared in constant time).
 
 | Metric | Labels | Use |
 |---|---|---|
@@ -23,8 +24,11 @@ API keys are never logged. Each request gets an `x-request-id`, which appears in
 **Health:** `/healthz` (process up) and `/readyz` (database, vector index, LLM configured; 503 if any check fails).
 
 ## 2. Daily LLM budget
-`PSETU_LLM_DAILY_BUDGET_INR` (default **₹25 per local day**, all users together; `0` = unlimited). Spend is summed
-from the stored turns since local midnight. Once it's reached:
+`PSETU_LLM_DAILY_BUDGET_INR` (default **₹25 per local day**, all users together; `0` = unlimited). Spend is read
+from an append-only `llm_spend` ledger, written in the same transaction as each turn, so deleting or pruning
+conversations can't lower it (an earlier version summed stored turns, which let a client reset the day's spend by
+deleting its sessions). Requests already in flight when the limit is crossed can still finish, so the overshoot is
+bounded by concurrent requests × ~₹0.1. Once it's reached:
 - **calendar answers keep working** (tithi, nakshatram, rahukalam, next Ekadashi: templates cost ₹0);
 - LLM questions get a clear message in the question's language ("Today's limit for detailed answers has been
   reached… ask this one again tomorrow"), not the misleading "not in the documents";

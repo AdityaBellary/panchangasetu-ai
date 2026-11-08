@@ -43,6 +43,10 @@ log = get_logger(__name__)
 # Full chunks (Telugu runs ~1.5-2k characters per chunk) beat many truncated ones: cutting a chunk
 # can drop exactly the sentence that answers the question.
 _MAX_EVIDENCE = 5
+# Answers to the question as asked (a day's facts, the next occurrence, a weekday period). Dated
+# events and daily notes are search results like passages: for "rain in Chaitra masam" they must not
+# crowd out the General text that answers it.
+_EXACT_KINDS = frozenset({"day", "occurrence", "weekday_period"})
 
 
 @dataclass(slots=True)
@@ -92,10 +96,9 @@ def select_evidence(evidence: list[Evidence], limit: int) -> list[Evidence]:
     A HYBRID question ("which months are good for griha pravesham?") retrieves dated lists and
     the rule that explains them; taking the first `limit` in retrieval order let the lists crowd
     the rule out entirely."""
-    exact = [e for e in evidence if e.kind != "chunk"]
-    groups = [
-        [e for e in evidence if e.kind == "chunk" and e.collection == c] for c in ("general", "panchanga")
-    ]
+    exact = [e for e in evidence if e.kind in _EXACT_KINDS]
+    searched = [e for e in evidence if e.kind not in _EXACT_KINDS]  # passages and dated events
+    groups = [[e for e in searched if e.collection == c] for c in ("general", "panchanga")]
     mixed = [e for pair in zip_longest(*groups) for e in pair if e is not None]
     return (exact + mixed)[:limit]
 

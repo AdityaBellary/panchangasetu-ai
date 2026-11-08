@@ -61,7 +61,8 @@ _DAY_MONTH = re.compile(
     rf"\b(\d{{1,2}})(?:st|nd|rd|th)?\s*(?:of\s+)?({_MONTH_ALT})\b\.?,?\s*(20\d{{2}})?", re.I
 )
 _MONTH_DAY = re.compile(rf"\b({_MONTH_ALT})\b\.?\s*(\d{{1,2}})(?:st|nd|rd|th)?\b,?\s*(20\d{{2}})?", re.I)
-_TE_MONTH_DAY = re.compile(rf"{_TE_B}({_TE_MONTH_ALT})\s*(\d{{1,2}})(?:\s*,?\s*(20\d{{2}}))?")
+# "(?!\d)": in "27 మార్చి 2027" the year must not be read as "మార్చి 20" (held-out eval, Phase 9).
+_TE_MONTH_DAY = re.compile(rf"{_TE_B}({_TE_MONTH_ALT})\s*(\d{{1,2}})(?!\d)(?:\s*,?\s*(20\d{{2}}))?")
 _TE_DAY_MONTH = re.compile(rf"(\d{{1,2}})\s*{_TE_B}({_TE_MONTH_ALT}){_TE_E}(?:\s*,?\s*(20\d{{2}}))?")
 _MONTH_ONLY = re.compile(rf"\b(?:in|during|for)\s+({_MONTH_ALT})\b\.?\s*(20\d{{2}})?", re.I)
 _TE_MONTH_ONLY = re.compile(rf"{_TE_B}({_TE_MONTH_ALT}){_TE_E}\s*(?:నెల|మాసం)?\s*(20\d{{2}})?")

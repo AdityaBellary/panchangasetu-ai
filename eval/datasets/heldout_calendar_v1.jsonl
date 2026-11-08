@@ -1,0 +1,159 @@
+{"id": "cal001", "kind": "day_tithi", "lang": "en", "q": "What is the tithi on 5-12-2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Dwadasi", "ద్వాదశి"], ["1:45"]]}
+{"id": "cal002", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 15 January 2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Saptami", "సప్తమి"], ["9:11"]]}
+{"id": "cal003", "kind": "day_tithi", "lang": "te", "q": "10 ఏప్రిల్ 2026 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["అష్టమి"], ["7:33"]]}
+{"id": "cal004", "kind": "day_tithi", "lang": "te", "q": "2 జూలై 2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["విదియ"], ["7:54"]]}
+{"id": "cal005", "kind": "day_tithi", "lang": "roman", "q": "17/10/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["సప్తమి", "Saptami"], ["5:25"]]}
+{"id": "cal006", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 4 September 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Ashtami", "అష్టమి"], ["11:28"]]}
+{"id": "cal007", "kind": "day_tithi", "lang": "en", "q": "tithi on 16-08-2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Chavithi", "చవితి"], ["7:00"]]}
+{"id": "cal008", "kind": "day_tithi", "lang": "te", "q": "7-05-2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పంచమి"], ["6:47"]]}
+{"id": "cal009", "kind": "day_tithi", "lang": "te", "q": "27 మార్చి 2027 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పంచమి"], ["2:49"]]}
+{"id": "cal010", "kind": "day_tithi", "lang": "roman", "q": "2/5/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పాడ్యమి", "Padyami"], ["11:01"]]}
+{"id": "cal011", "kind": "day_tithi", "lang": "en", "q": "What is the tithi on 5 July 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Panchami", "పంచమి"], ["9:56"]]}
+{"id": "cal012", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 14-08-2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Vidiya", "విదియ"], ["8:31"]]}
+{"id": "cal013", "kind": "day_tithi", "lang": "te", "q": "21 డిసెంబర్ 2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ద్వాదశి"], ["2:12"]]}
+{"id": "cal014", "kind": "day_tithi", "lang": "te", "q": "9-05-2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["సప్తమి"], ["9:27"]]}
+{"id": "cal015", "kind": "day_tithi", "lang": "roman", "q": "28/9/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["విదియ", "Vidiya"], ["8:05"]]}
+{"id": "cal016", "kind": "day_tithi", "lang": "en", "q": "tithi on 27/7/2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Trayodasi", "త్రయోదశి"], ["3:50"]]}
+{"id": "cal017", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 29/10/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Chavithi", "చవితి"], ["2:07"]]}
+{"id": "cal018", "kind": "day_tithi", "lang": "te", "q": "16 జూలై 2026 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["విదియ"], ["11:48"]]}
+{"id": "cal019", "kind": "day_tithi", "lang": "te", "q": "30-08-2026 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["విదియ"], ["9:16"]]}
+{"id": "cal020", "kind": "day_tithi", "lang": "roman", "q": "1/10/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పంచమి", "Panchami"], ["2:45"]]}
+{"id": "cal021", "kind": "day_tithi", "lang": "en", "q": "tithi on 20 July 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Shashti", "షష్ఠి"], ["7:07"]]}
+{"id": "cal022", "kind": "day_tithi", "lang": "en", "q": "What is the tithi on March 13, 2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Panchami", "పంచమి"], ["12:55"]]}
+{"id": "cal023", "kind": "day_tithi", "lang": "te", "q": "27 డిసెంబర్ 2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["చవితి"], ["11:02"]]}
+{"id": "cal024", "kind": "day_tithi", "lang": "te", "q": "20-10-2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["నవమి"], ["9:11"]]}
+{"id": "cal025", "kind": "day_tithi", "lang": "roman", "q": "26/10/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పూర్ణిమ", "Purnima"], ["9:48"]]}
+{"id": "cal026", "kind": "day_tithi", "lang": "en", "q": "tithi on February 7, 2027", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Padyami", "పాడ్యమి"], ["10:29"]]}
+{"id": "cal027", "kind": "day_tithi", "lang": "en", "q": "tithi on December 18, 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Navami", "నవమి"], ["5:26"]]}
+{"id": "cal028", "kind": "day_tithi", "lang": "te", "q": "23 డిసెంబర్ 2026 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["చతుర్దశి"], ["10:21"]]}
+{"id": "cal029", "kind": "day_tithi", "lang": "te", "q": "11 అక్టోబర్ 2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పాడ్యమి"], ["8:28"]]}
+{"id": "cal030", "kind": "day_tithi", "lang": "roman", "q": "7/12/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["చతుర్దశి", "Chaturdasi"], ["3:32"]]}
+{"id": "cal031", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 27/3/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Navami", "నవమి"], ["12:31"]]}
+{"id": "cal032", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 12/4/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Dasami", "దశమి"], ["9:22"]]}
+{"id": "cal033", "kind": "day_tithi", "lang": "te", "q": "29 డిసెంబర్ 2026 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["షష్ఠి"], ["7:34"]]}
+{"id": "cal034", "kind": "day_tithi", "lang": "te", "q": "20-02-2027 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["చతుర్దశి"], ["7:33"]]}
+{"id": "cal035", "kind": "day_tithi", "lang": "roman", "q": "13/9/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["విదియ", "Vidiya"], ["7:11"]]}
+{"id": "cal036", "kind": "day_tithi", "lang": "en", "q": "tithi on October 19, 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Ashtami", "అష్టమి"], ["7:28"]]}
+{"id": "cal037", "kind": "day_tithi", "lang": "en", "q": "Which tithi is it on 14 September 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Tadiya", "తదియ"], ["7:10"]]}
+{"id": "cal038", "kind": "day_tithi", "lang": "te", "q": "10 జూన్ 2026 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["దశమి"], ["7:47"]]}
+{"id": "cal039", "kind": "day_tithi", "lang": "te", "q": "11-06-2026 తిథి ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఏకాదశి"], ["6:10"]]}
+{"id": "cal040", "kind": "day_tithi", "lang": "roman", "q": "31/12/2026 tithi enti?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["అష్టమి", "Ashtami"], ["5:32"]]}
+{"id": "cal041", "kind": "day_nakshatra", "lang": "en", "q": "Which star (nakshatra) is on June 11, 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Ashwini", "అశ్విని"], ["3:08"]]}
+{"id": "cal042", "kind": "day_nakshatra", "lang": "en", "q": "nakshatram October 14, 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Anuradha", "అనూరాధ"], ["3:35"]]}
+{"id": "cal043", "kind": "day_nakshatra", "lang": "te", "q": "27-03-2027 న నక్షత్రం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["అనూరాధ"], ["11:32"]]}
+{"id": "cal044", "kind": "day_nakshatra", "lang": "te", "q": "27-03-2026 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పునర్వసు"], ["5:41"]]}
+{"id": "cal045", "kind": "day_nakshatra", "lang": "roman", "q": "30/3/2027 nakshatram enti cheppandi", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పూర్వాషాఢ", "Purvashadha"], ["6:14"]]}
+{"id": "cal046", "kind": "day_nakshatra", "lang": "en", "q": "What is the nakshatram on 20/10/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Shravana", "శ్రవణం"], ["3:43"]]}
+{"id": "cal047", "kind": "day_nakshatra", "lang": "en", "q": "nakshatram April 10, 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Purvashadha", "పూర్వాషాఢ"], ["8:25"]]}
+{"id": "cal048", "kind": "day_nakshatra", "lang": "te", "q": "31 డిసెంబర్ 2026 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["హస్త"], ["9:16"]]}
+{"id": "cal049", "kind": "day_nakshatra", "lang": "te", "q": "23-02-2027 న నక్షత్రం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఉత్తర"], ["1:12"]]}
+{"id": "cal050", "kind": "day_nakshatra", "lang": "roman", "q": "14/9/2026 nakshatram enti cheppandi", "now": "2026-11-07T09:00", "expect": "answer", "must": [["చిత్త", "Chitta"], ["3:14"]]}
+{"id": "cal051", "kind": "day_nakshatra", "lang": "en", "q": "What is the nakshatram on 20/4/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Krittika", "కృత్తిక"], ["8:01"]]}
+{"id": "cal052", "kind": "day_nakshatra", "lang": "en", "q": "What is the nakshatram on 28-03-2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Jyeshta", "జ్యేష్ఠ"], ["1:27"]]}
+{"id": "cal053", "kind": "day_nakshatra", "lang": "te", "q": "1-04-2026 న నక్షత్రం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఉత్తర"], ["3:48"]]}
+{"id": "cal054", "kind": "day_nakshatra", "lang": "te", "q": "30-07-2026 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["శ్రవణం"], ["5:53"]]}
+{"id": "cal055", "kind": "day_nakshatra", "lang": "roman", "q": "18/6/2026 nakshatram enti cheppandi", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పుష్యమి", "Pushyami"], ["4:43"]]}
+{"id": "cal056", "kind": "day_nakshatra", "lang": "en", "q": "nakshatram 26-05-2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Uttara", "ఉత్తర"], ["6:57"]]}
+{"id": "cal057", "kind": "day_nakshatra", "lang": "en", "q": "What is the nakshatram on 5/12/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Chitta", "చిత్త"], ["1:48"]]}
+{"id": "cal058", "kind": "day_nakshatra", "lang": "te", "q": "19-01-2027 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["రోహిణి"], ["4:09"]]}
+{"id": "cal059", "kind": "day_nakshatra", "lang": "te", "q": "22 సెప్టెంబర్ 2026 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఉత్తరాషాఢ"], ["6:31"]]}
+{"id": "cal060", "kind": "day_nakshatra", "lang": "roman", "q": "8/10/2026 nakshatram enti cheppandi", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పుబ్బ", "Pubba"], ["10:03"]]}
+{"id": "cal061", "kind": "day_nakshatra", "lang": "en", "q": "nakshatram 9 April 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Moola", "మూల"], ["6:08"]]}
+{"id": "cal062", "kind": "day_nakshatra", "lang": "te", "q": "2-07-2026 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఉత్తరాషాఢ"], ["8:37"]]}
+{"id": "cal063", "kind": "day_nakshatra", "lang": "te", "q": "9-08-2026 నక్షత్రం ఏది?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["మృగశిర"], ["1:41"]]}
+{"id": "cal064", "kind": "day_nakshatra", "lang": "roman", "q": "1/11/2026 nakshatram enti cheppandi", "now": "2026-11-07T09:00", "expect": "answer", "must": [["పునర్వసు", "Punarvasu"], ["10:34"]]}
+{"id": "cal065", "kind": "day_nakshatra", "lang": "en", "q": "Which star (nakshatra) is on April 15, 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Purvabhadra", "పూర్వాభాద్ర"], ["1:19"]]}
+{"id": "cal066", "kind": "day_nakshatra", "lang": "en", "q": "What is the nakshatram on 24/10/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Uttarabhadra", "ఉత్తరాభాద్ర"], ["7:51"]]}
+{"id": "cal067", "kind": "day_nakshatra", "lang": "te", "q": "9-10-2026 న నక్షత్రం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఉత్తర"], ["9:48"]]}
+{"id": "cal068", "kind": "day_nakshatra", "lang": "te", "q": "10-12-2026 న నక్షత్రం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["మూల"], ["10:55"]]}
+{"id": "cal069", "kind": "day_nakshatra", "lang": "roman", "q": "7/2/2027 nakshatram enti cheppandi", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ధనిష్ఠ", "Dhanishta"], ["11:14"]]}
+{"id": "cal070", "kind": "day_yoga", "lang": "en", "q": "What is the yogam on April 16, 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Indra", "ఐంద్రం"], ["9:38"]]}
+{"id": "cal071", "kind": "day_yoga", "lang": "te", "q": "20 అక్టోబర్ 2026 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["శూలం"], ["11:40"]]}
+{"id": "cal072", "kind": "day_yoga", "lang": "en", "q": "yoga on September 29, 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Vyaghata", "వ్యాఘాతం"], ["9:17"]]}
+{"id": "cal073", "kind": "day_yoga", "lang": "te", "q": "25 మార్చి 2026 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["ఆయుష్మాన్"], ["9:04"]]}
+{"id": "cal074", "kind": "day_yoga", "lang": "en", "q": "yoga on 26-07-2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Indra", "ఐంద్రం"], ["11:52"]]}
+{"id": "cal075", "kind": "day_yoga", "lang": "te", "q": "22 ఆగష్టు 2026 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["వైధృతి"], ["7:28"]]}
+{"id": "cal076", "kind": "day_yoga", "lang": "en", "q": "What is the yogam on 9 August 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Harshana", "హర్షణం"], ["2:18"]]}
+{"id": "cal077", "kind": "day_yoga", "lang": "te", "q": "7 ఫిబ్రవరి 2027 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["వరీయాన్"], ["9:29"]]}
+{"id": "cal078", "kind": "day_yoga", "lang": "en", "q": "yoga on 10 September 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Siddha", "సిద్ధం"], ["9:09"]]}
+{"id": "cal079", "kind": "day_yoga", "lang": "te", "q": "11 అక్టోబర్ 2026 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["వైధృతి"], ["10:14"]]}
+{"id": "cal080", "kind": "day_yoga", "lang": "en", "q": "What is the yogam on 24 December 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Shukla Yoga", "శుక్లం"], ["3:17"]]}
+{"id": "cal081", "kind": "day_yoga", "lang": "te", "q": "26-10-2026 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["వజ్రం"], ["4:21"]]}
+{"id": "cal082", "kind": "day_yoga", "lang": "en", "q": "What is the yogam on 9/5/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Shukla Yoga", "శుక్లం"], ["10:51"]]}
+{"id": "cal083", "kind": "day_yoga", "lang": "te", "q": "31 జనవరి 2027 న యోగం ఏమిటి?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["వృద్ధి"], ["7:25"]]}
+{"id": "cal084", "kind": "day_yoga", "lang": "en", "q": "yoga on 23 September 2026", "now": "2026-11-07T09:00", "expect": "answer", "must": [["Sukarma", "సుకర్మ"], ["5:01"]]}
+{"id": "cal085", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 5 April 2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:02"]]}
+{"id": "cal086", "kind": "day_varjyam", "lang": "te", "q": "19-10-2026 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["5:55"]]}
+{"id": "cal087", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 19/9/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["7:46"]]}
+{"id": "cal088", "kind": "day_varjyam", "lang": "te", "q": "22-07-2026 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["6:15"]]}
+{"id": "cal089", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 26 December 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["10:32"]]}
+{"id": "cal090", "kind": "day_varjyam", "lang": "te", "q": "26-05-2026 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:36"]]}
+{"id": "cal091", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 12/1/2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["12:11"]]}
+{"id": "cal092", "kind": "day_varjyam", "lang": "te", "q": "23-08-2026 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["4:38"]]}
+{"id": "cal093", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 30 September 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["9:40"]]}
+{"id": "cal094", "kind": "day_varjyam", "lang": "te", "q": "4-12-2026 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["9:29"]]}
+{"id": "cal095", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 11/10/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["6:13"]]}
+{"id": "cal096", "kind": "day_varjyam", "lang": "te", "q": "4-03-2027 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["8:03"]]}
+{"id": "cal097", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 16 August 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["2:54"]]}
+{"id": "cal098", "kind": "day_varjyam", "lang": "te", "q": "6-12-2026 న వర్జ్యం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["8:42"]]}
+{"id": "cal099", "kind": "day_varjyam", "lang": "en", "q": "When is varjyam on 1/8/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["2:48"]]}
+{"id": "cal100", "kind": "day_yamagandam", "lang": "en", "q": "yamagandam on 7 March 2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["12:00"]]}
+{"id": "cal101", "kind": "day_rahukalam", "lang": "te", "q": "11-04-2026 రాహుకాలం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["9:00"]]}
+{"id": "cal102", "kind": "day_rahukalam", "lang": "en", "q": "rahukalam on 2/6/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:00"]]}
+{"id": "cal103", "kind": "day_yamagandam", "lang": "te", "q": "17-08-2026 యమగండం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["10:30"]]}
+{"id": "cal104", "kind": "day_rahukalam", "lang": "en", "q": "rahukalam on 25 November 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["12:00"]]}
+{"id": "cal105", "kind": "day_rahukalam", "lang": "te", "q": "2-02-2027 రాహుకాలం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:00"]]}
+{"id": "cal106", "kind": "day_yamagandam", "lang": "en", "q": "yamagandam on 1/9/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["9:00"]]}
+{"id": "cal107", "kind": "day_rahukalam", "lang": "te", "q": "24-03-2027 రాహుకాలం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["12:00"]]}
+{"id": "cal108", "kind": "day_rahukalam", "lang": "en", "q": "rahukalam on 8 August 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["9:00"]]}
+{"id": "cal109", "kind": "day_yamagandam", "lang": "te", "q": "22-02-2027 యమగండం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["10:30"]]}
+{"id": "cal110", "kind": "day_rahukalam", "lang": "en", "q": "rahukalam on 19/5/2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:00"]]}
+{"id": "cal111", "kind": "day_rahukalam", "lang": "te", "q": "19-04-2026 రాహుకాలం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["4:30"]]}
+{"id": "cal112", "kind": "day_yamagandam", "lang": "en", "q": "yamagandam on 21 April 2026?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["9:00"]]}
+{"id": "cal113", "kind": "day_rahukalam", "lang": "te", "q": "7-04-2026 రాహుకాలం ఎప్పుడు?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:00"]]}
+{"id": "cal114", "kind": "day_rahukalam", "lang": "en", "q": "rahukalam on 23/2/2027?", "now": "2026-11-07T09:00", "expect": "answer", "must": [["3:00"]]}
+{"id": "cal115", "kind": "find_tithi", "lang": "te", "q": "తదుపరి ఏకాదశి ఏ రోజు?", "now": "2026-11-20T09:00", "expect": "answer", "must": [["20 నవంబర్ 2026"]]}
+{"id": "cal116", "kind": "find_tithi", "lang": "en", "q": "next purnima date?", "now": "2026-10-26T09:00", "expect": "answer", "must": [["26 October 2026", "26 October 2026"]]}
+{"id": "cal117", "kind": "find_tithi", "lang": "te", "q": "తదుపరి అమావాస్య ఏ రోజు?", "now": "2026-07-19T09:00", "expect": "answer", "must": [["12 ఆగష్టు 2026", "12 ఆగస్టు 2026"]]}
+{"id": "cal118", "kind": "find_tithi", "lang": "en", "q": "When is the next Chavithi?", "now": "2026-08-08T09:00", "expect": "answer", "must": [["16 August 2026", "16 August 2026"]]}
+{"id": "cal119", "kind": "find_tithi", "lang": "te", "q": "వచ్చే అష్టమి ఎప్పుడు?", "now": "2026-12-19T09:00", "expect": "answer", "must": [["31 డిసెంబర్ 2026"]]}
+{"id": "cal120", "kind": "find_tithi", "lang": "en", "q": "When is the next Dwadasi?", "now": "2026-11-15T09:00", "expect": "answer", "must": [["21 November 2026", "21 November 2026"]]}
+{"id": "cal121", "kind": "find_tithi", "lang": "te", "q": "వచ్చే పంచమి ఎప్పుడు?", "now": "2026-12-01T09:00", "expect": "answer", "must": [["14 డిసెంబర్ 2026"]]}
+{"id": "cal122", "kind": "find_nakshatra", "lang": "en", "q": "next rohini date?", "now": "2026-05-20T09:00", "expect": "answer", "must": [["14 June 2026", "14 June 2026"]]}
+{"id": "cal123", "kind": "find_nakshatra", "lang": "te", "q": "తదుపరి శ్రవణం ఏ రోజు?", "now": "2026-06-20T09:00", "expect": "answer", "must": [["3 జూలై 2026", "3 జులై 2026"]]}
+{"id": "cal124", "kind": "find_nakshatra", "lang": "en", "q": "next pushyami date?", "now": "2027-01-23T09:00", "expect": "answer", "must": [["23 January 2027", "23 January 2027"]]}
+{"id": "cal125", "kind": "find_nakshatra", "lang": "te", "q": "తదుపరి అశ్విని ఏ రోజు?", "now": "2027-01-06T09:00", "expect": "answer", "must": [["16 జనవరి 2027"]]}
+{"id": "cal126", "kind": "find_nakshatra", "lang": "en", "q": "When is the next Mrigasira?", "now": "2026-10-17T09:00", "expect": "answer", "must": [["30 October 2026", "30 October 2026"]]}
+{"id": "cal127", "kind": "find_tithi", "lang": "te", "q": "వచ్చే ఏకాదశి ఎప్పుడు?", "now": "2026-06-28T09:00", "expect": "answer", "must": [["10 జూలై 2026", "10 జులై 2026"]]}
+{"id": "cal128", "kind": "find_tithi", "lang": "en", "q": "When is the next Purnima?", "now": "2026-06-20T09:00", "expect": "answer", "must": [["29 June 2026", "29 June 2026"]]}
+{"id": "cal129", "kind": "find_tithi", "lang": "te", "q": "తదుపరి అమావాస్య ఏ రోజు?", "now": "2026-06-26T09:00", "expect": "answer", "must": [["14 జూలై 2026", "14 జులై 2026"]]}
+{"id": "cal130", "kind": "find_tithi", "lang": "en", "q": "next chavithi date?", "now": "2026-05-14T09:00", "expect": "answer", "must": [["20 May 2026", "20 May 2026"]]}
+{"id": "cal131", "kind": "find_tithi", "lang": "te", "q": "వచ్చే అష్టమి ఎప్పుడు?", "now": "2027-01-20T09:00", "expect": "answer", "must": [["30 జనవరి 2027"]]}
+{"id": "cal132", "kind": "find_tithi", "lang": "en", "q": "next dwadasi date?", "now": "2027-02-01T09:00", "expect": "answer", "must": [["3 February 2027", "03 February 2027"]]}
+{"id": "cal133", "kind": "find_tithi", "lang": "te", "q": "తదుపరి పంచమి ఏ రోజు?", "now": "2026-08-23T09:00", "expect": "answer", "must": [["1 సెప్టెంబర్ 2026"]]}
+{"id": "cal134", "kind": "find_nakshatra", "lang": "en", "q": "next rohini date?", "now": "2026-06-10T09:00", "expect": "answer", "must": [["14 June 2026", "14 June 2026"]]}
+{"id": "cal135", "kind": "find_nakshatra", "lang": "te", "q": "వచ్చే శ్రవణం ఎప్పుడు?", "now": "2026-05-21T09:00", "expect": "answer", "must": [["5 జూన్ 2026"]]}
+{"id": "cal136", "kind": "find_nakshatra", "lang": "en", "q": "When is the next Pushyami?", "now": "2026-05-28T09:00", "expect": "answer", "must": [["18 June 2026", "18 June 2026"]]}
+{"id": "cal137", "kind": "find_nakshatra", "lang": "te", "q": "తదుపరి అశ్విని ఏ రోజు?", "now": "2026-05-30T09:00", "expect": "answer", "must": [["11 జూన్ 2026"]]}
+{"id": "cal138", "kind": "find_nakshatra", "lang": "en", "q": "When is the next Mrigasira?", "now": "2026-11-16T09:00", "expect": "answer", "must": [["26 November 2026", "26 November 2026"]]}
+{"id": "cal139", "kind": "find_tithi", "lang": "te", "q": "వచ్చే ఏకాదశి ఎప్పుడు?", "now": "2026-05-14T09:00", "expect": "answer", "must": [["27 మే 2026"]]}
+{"id": "cal140", "kind": "find_tithi", "lang": "en", "q": "next purnima date?", "now": "2026-10-15T09:00", "expect": "answer", "must": [["26 October 2026", "26 October 2026"]]}
+{"id": "cal141", "kind": "find_tithi", "lang": "te", "q": "వచ్చే అమావాస్య ఎప్పుడు?", "now": "2026-06-15T09:00", "expect": "answer", "must": [["15 జూన్ 2026"]]}
+{"id": "cal142", "kind": "find_tithi", "lang": "en", "q": "When is the next Chavithi?", "now": "2026-10-28T09:00", "expect": "answer", "must": [["29 October 2026", "29 October 2026"]]}
+{"id": "cal143", "kind": "find_tithi", "lang": "te", "q": "వచ్చే అష్టమి ఎప్పుడు?", "now": "2026-05-16T09:00", "expect": "answer", "must": [["24 మే 2026"]]}
+{"id": "cal144", "kind": "find_tithi", "lang": "en", "q": "next dwadasi date?", "now": "2026-10-12T09:00", "expect": "answer", "must": [["23 October 2026", "23 October 2026"]]}
+{"id": "cal145", "kind": "find_tithi", "lang": "te", "q": "తదుపరి పంచమి ఏ రోజు?", "now": "2026-08-29T09:00", "expect": "answer", "must": [["1 సెప్టెంబర్ 2026"]]}
+{"id": "cal146", "kind": "find_nakshatra", "lang": "en", "q": "next rohini date?", "now": "2026-08-20T09:00", "expect": "answer", "must": [["4 September 2026", "04 September 2026"]]}
+{"id": "cal147", "kind": "find_nakshatra", "lang": "te", "q": "తదుపరి శ్రవణం ఏ రోజు?", "now": "2026-08-01T09:00", "expect": "answer", "must": [["26 ఆగష్టు 2026", "26 ఆగస్టు 2026"]]}
+{"id": "cal148", "kind": "find_nakshatra", "lang": "en", "q": "When is the next Pushyami?", "now": "2026-03-27T09:00", "expect": "answer", "must": [["28 March 2026", "28 March 2026"]]}
+{"id": "cal149", "kind": "find_nakshatra", "lang": "te", "q": "తదుపరి అశ్విని ఏ రోజు?", "now": "2026-07-21T09:00", "expect": "answer", "must": [["5 ఆగష్టు 2026", "5 ఆగస్టు 2026"]]}
+{"id": "cal150", "kind": "out_of_range", "lang": "en", "q": "What is the nakshatram on 3 February 2025?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal151", "kind": "out_of_range", "lang": "te", "q": "1-06-2028 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal152", "kind": "out_of_range", "lang": "en", "q": "What is the nakshatram on 14/1/2029?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal153", "kind": "out_of_range", "lang": "te", "q": "15-08-2030 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal154", "kind": "out_of_range", "lang": "en", "q": "What is the nakshatram on 25 December 2024?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal155", "kind": "out_of_range", "lang": "te", "q": "3-02-2025 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal156", "kind": "out_of_range", "lang": "en", "q": "What is the nakshatram on 1/6/2028?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal157", "kind": "out_of_range", "lang": "te", "q": "14-01-2029 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal158", "kind": "out_of_range", "lang": "en", "q": "What is the nakshatram on 15 August 2030?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}
+{"id": "cal159", "kind": "out_of_range", "lang": "te", "q": "25-12-2024 న తిథి ఏమిటి?", "now": "2026-11-07T09:00", "expect": "abstain", "must": []}

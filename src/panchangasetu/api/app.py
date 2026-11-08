@@ -17,6 +17,7 @@ synchronous (local embeddings + one LLM call), so endpoints are plain `def` and 
 thread pool.
 """
 
+import hmac
 import time
 import uuid
 from collections import defaultdict, deque
@@ -42,6 +43,7 @@ from panchangasetu.observability.metrics import HTTP_REQUESTS, HTTP_SECONDS, REG
 
 log = get_logger(__name__)
 STATIC_DIR = Path(__file__).parent / "static"
+_LOOPBACK = frozenset({"127.0.0.1", "::1", "localhost"})
 
 
 class Authenticator(Protocol):
@@ -243,10 +245,15 @@ def create_app(services: ApiServices) -> FastAPI:
         return {"status": "ok"}
 
     @app.get("/metrics", include_in_schema=False)
-    def metrics(authorization: Annotated[str | None, Header()] = None) -> Response:
-        # Prometheus scrape endpoint. With a token configured, scrapers must send it as a bearer token.
-        if services.metrics_token and authorization != f"Bearer {services.metrics_token}":
-            raise HTTPException(401, "metrics token required", headers={"WWW-Authenticate": "Bearer"})
+    def metrics(request: Request, authorization: Annotated[str | None, Header()] = None) -> Response:
+        # Prometheus scrape endpoint. With a token configured, scrapers must send it as a bearer token;
+        # without one, only clients on this machine (loopback) may read it.
+        if services.metrics_token:
+            expected = f"Bearer {services.metrics_token}".encode()
+            if not hmac.compare_digest((authorization or "").encode(), expected):
+                raise HTTPException(401, "metrics token required", headers={"WWW-Authenticate": "Bearer"})
+        elif (request.client.host if request.client else "") not in _LOOPBACK:
+            raise HTTPException(403, "set PSETU_API_METRICS_TOKEN to scrape metrics from another host")
         return Response(generate_latest(REGISTRY), media_type=CONTENT_TYPE_LATEST)
 
     @app.get("/readyz", include_in_schema=False)

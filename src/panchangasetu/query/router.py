@@ -98,9 +98,18 @@ class EmbeddingRouter:
 
 
 class QueryRouter:
-    def __init__(self, semantic: SemanticClassifier | None = None, *, min_confidence: float = 0.65) -> None:
+    def __init__(
+        self,
+        semantic: SemanticClassifier | None = None,
+        *,
+        min_confidence: float = 0.65,
+        panchanga_only_confidence: float = 0.8,
+    ) -> None:
         self.semantic = semantic
         self.min_confidence = min_confidence
+        # Searching only the calendar side hides General text entirely, while HYBRID costs little
+        # (sources alternate between collections), so a semantic "panchanga" must be surer.
+        self.panchanga_only_confidence = panchanga_only_confidence
 
     def route(self, text: str, today: date, *, language: Language | None = None) -> Route:
         # `language` overrides detection when the text was rewritten from a follow-up: the answer
@@ -114,11 +123,21 @@ class QueryRouter:
 
         def route(intent: Intent, mode: PanchangaMode, conf: float, why: str) -> Route:
             reasons.append(why)
+            if intent == Intent.PANCHANGA and mode != PanchangaMode.DAY and slots.general_topic:
+                # "rain in Magha masam", "Gowri panchangam on Monday": dated-list search alone would
+                # shut out the General text that actually answers. Both are searched; sources alternate.
+                intent = Intent.HYBRID
+                reasons.append("general topic named: also General")
             return Route(intent, mode, lang, dates, slots, conf, reasons)
 
         event_attrs = [a for a in slots.attributes if a in EVENT_ATTRIBUTES]
         festival_named = bool(named and slots.residual)  # "Sri Rama Navami", "రథసప్తమి"
 
+        sun_entering = "transit" in slots.attributes and slots.when  # "when does the Sun enter Makara?"
+        if slots.rasi and not sun_entering and not (dates and day_attrs and not event_attrs):
+            # Rasi predictions exist only in General text; a date in the question ("after June 2")
+            # qualifies the prediction, it doesn't make it a calendar lookup.
+            return route(Intent.GENERAL, PanchangaMode.NONE, 0.9, "rasi named: predictions")
         if dates and event_attrs and not slots.concept:
             return route(Intent.PANCHANGA, PanchangaMode.SEARCH, 0.9, "date/range + festivals/muhurthams")
         if dates and (day_attrs or not slots.attributes) and not (slots.concept or slots.general_topic):
@@ -150,6 +169,8 @@ class QueryRouter:
             return route(Intent.HYBRID, PanchangaMode.SEARCH, conf, "low confidence -> both collections")
         if label == "panchanga":
             mode = PanchangaMode.FIND if named and not festival_named else PanchangaMode.SEARCH
+            if conf < self.panchanga_only_confidence:
+                return route(Intent.HYBRID, mode, conf, "semantic panchanga, not sure enough -> both")
             return route(Intent.PANCHANGA, mode, conf, "semantic router")
         return route(Intent.GENERAL, PanchangaMode.NONE, conf, "semantic router")
 

@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from panchangasetu.storage.db import session_scope
-from panchangasetu.storage.models import ChatSession, ChatTurn, utcnow
+from panchangasetu.storage.models import ChatSession, ChatTurn, LlmSpend, utcnow
 
 
 @dataclass(slots=True)
@@ -66,7 +66,8 @@ class SessionStore(Protocol):
     def delete(self, session_id: str, owner: str | None = None) -> bool: ...
 
     def spent_since(self, since: datetime) -> float:
-        """LLM spend (INR) recorded by turns asked at or after `since`, across all sessions."""
+        """LLM spend (INR) since `since`, across all sessions, from an append-only ledger written
+        with each turn. Deleting or pruning conversations does not lower it."""
         ...
 
     def prune(self, inactive_before: datetime) -> int:
@@ -77,6 +78,7 @@ class SessionStore(Protocol):
 class InMemorySessionStore:
     def __init__(self) -> None:
         self._turns: dict[str, list[TurnRecord]] = {}
+        self._spend: list[tuple[datetime, float]] = []
         self._owners: dict[str, str | None] = {}
 
     def create(self, owner: str | None = None) -> str:
@@ -97,6 +99,8 @@ class InMemorySessionStore:
         if session_id not in self._turns:
             raise SessionNotFound(session_id)
         self._turns[session_id].append(turn)
+        if turn.cost_inr:
+            self._spend.append((turn.asked_at, turn.cost_inr))
 
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         out = [
@@ -113,7 +117,7 @@ class InMemorySessionStore:
         return True
 
     def spent_since(self, since: datetime) -> float:
-        return sum(t.cost_inr for turns in self._turns.values() for t in turns if t.asked_at >= since)
+        return sum(cost for at, cost in self._spend if at >= since)
 
     def prune(self, inactive_before: datetime) -> int:
         stale = [sid for sid, turns in self._turns.items() if turns and turns[-1].asked_at < inactive_before]
@@ -188,6 +192,8 @@ class SqlSessionStore:
                 )
             )
             chat.updated_at = utcnow()
+            if turn.cost_inr:  # same transaction as the turn: spend is never recorded without it
+                s.add(LlmSpend(spent_at=turn.asked_at, cost_inr=turn.cost_inr, owner=chat.owner))
 
     def list_sessions(self, owner: str | None, limit: int = 50) -> list[SessionSummary]:
         with session_scope(self.factory) as s:
@@ -221,7 +227,7 @@ class SqlSessionStore:
     def spent_since(self, since: datetime) -> float:
         with session_scope(self.factory) as s:
             total = s.scalar(
-                select(func.coalesce(func.sum(ChatTurn.cost_inr), 0.0)).where(ChatTurn.asked_at >= since)
+                select(func.coalesce(func.sum(LlmSpend.cost_inr), 0.0)).where(LlmSpend.spent_at >= since)
             )
             return float(total or 0.0)
 

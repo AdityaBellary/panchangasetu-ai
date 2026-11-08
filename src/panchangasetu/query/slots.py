@@ -80,6 +80,9 @@ GENERAL_TOPICS = [
     "remedy", "remedies", "gemstone", "matching", "compatibility", "after marriage", "king", "minister",
     "ఫలితాలు", "ఫలితములు", "రాశి", "దోషం", "దోష", "వాస్తు", "స్తోత్రం", "శ్లోకం", "శ్లోకములు", "కల",
     "బల్లి", "శకునం", "తర్పణం", "పొంతన", "రాజు", "మంత్రి", "నివారణ",
+    # The year's forecasts (samvatsara phalalu) and fixed weekday tables live in General text too.
+    "rain", "rains", "rainfall", "weather", "price", "prices", "forecast", "gowri", "gauri",
+    "వర్షం", "వర్షాలు", "వర్షములు", "వర్ష", "ధర", "ధరలు", "గౌరీ", "ఆదాయం", "వ్యయం", "కందాయ",
 ]  # fmt: skip
 _CLAUSE_SPLIT = re.compile(r"\s(?:and|also)\s|,|;|మరియు|\?(?=.)")
 _STOPWORDS = frozenset(
@@ -166,8 +169,15 @@ def extract_slots(text: str) -> Slots:
         if not any(_contains(rest, t.lower()) for t in ATTRIBUTES["muhurtham"]):
             slots.attributes.remove("muhurtham")
     slots.rasi = _rasi(h)
+    # "Makara Sankranti" / "మకర సంక్రాంతి" names a festival (the Sun entering the sign), not a question
+    # about Makara rasi predictions.
+    if slots.rasi and re.search(r"(?:sankranti|sankranthi|sankramanam|సంక్రాంతి|సంక్రమణ)", h):
+        slots.rasi = None
     slots.tithi = _name(h, TITHIS)
     slots.nakshatra = _name(h, NAKSHATRAS)
+    # "Magha masam" / "మాఘ మాసం" names a lunar month; the nakshatra Magha/మఖ is only an alias clash.
+    if slots.nakshatra and re.search(r"(?:magha|maagha|మాఘ)\s*(?:masam|masa|month|మాస)", h):
+        slots.nakshatra = None
     # A bare nakshatra name (e.g. "hasta") inside other words is common in English text;
     # only trust it when the question is about panchanga or names a nakshatra explicitly.
     if slots.nakshatra and slots.nakshatra.isascii():
