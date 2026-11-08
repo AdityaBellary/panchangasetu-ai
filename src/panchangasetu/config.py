@@ -76,7 +76,6 @@ class Settings(BaseSettings):
     # --- vector index & retrieval ---
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: SecretStr | None = None
-    qdrant_timeout_s: int = Field(60, gt=0)  # Qdrant Cloud: index uploads take longer than the 5 s default
     index_prefix: str = "psetu"
     # Chosen by the Phase 3 bake-off: best cross-lingual recall.
     embedding_model: str = "intfloat/multilingual-e5-large"
