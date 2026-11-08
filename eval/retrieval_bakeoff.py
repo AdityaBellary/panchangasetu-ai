@@ -20,7 +20,6 @@ from sqlalchemy import select
 
 from panchangasetu.config import get_settings
 from panchangasetu.providers.embeddings.fastembed_dense import FastEmbedDense
-from panchangasetu.providers.embeddings.openai_dense import OpenAIEmbedder
 from panchangasetu.providers.embeddings.telugu_sparse import TeluguSparseEncoder
 from panchangasetu.retrieval.documents import STRUCTURED_ONLY_SECTIONS, render_for_embedding
 from panchangasetu.storage.db import make_engine, make_session_factory
@@ -124,12 +123,7 @@ def main() -> None:
         report[f"sparse{'+gloss' if gloss else ''}"] = evaluate(sparse_rank, queries, corpus)
 
         for model in args.models:
-            if model.startswith("openai:"):
-                key = get_settings().openai_api_key
-                assert key is not None, "OPENAI_API_KEY is not set"
-                emb = OpenAIEmbedder(key.get_secret_value(), model.split(":", 1)[1])
-            else:
-                emb = FastEmbedDense(model, cache_dir=ROOT / "data/models")
+            emb = FastEmbedDense(model, cache_dir=ROOT / "data/models")
             t0 = time.time()
             D = np.array(emb.embed_documents(docs))
             index_s = time.time() - t0
@@ -150,8 +144,6 @@ def main() -> None:
                 "top1_score_neg_max": round(max(neg_top), 3),
             }
             report[f"{tag} + sparse (RRF)"] = evaluate(hybrid_rank, queries, corpus)
-            if isinstance(emb, OpenAIEmbedder):
-                report[tag]["openai_tokens"] = emb.tokens_used
             print(tag, report[tag], "\n  hybrid", report[f"{tag} + sparse (RRF)"], flush=True)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)

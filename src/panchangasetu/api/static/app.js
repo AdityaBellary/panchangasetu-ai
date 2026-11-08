@@ -192,10 +192,6 @@ function renderAnswer(a, { animate = false } = {}) {
     li.append(el("p", { class: "understood" }, "Answered as ", el("q", { lang: langOf(a.standalone_question), text: a.standalone_question })));
   }
   li.append(el("div", { class: "answer-text", lang }, ...paragraphs(a.answer)));
-  if (a.abstained) {
-    li.append(el("p", { class: "abstain-hint", text: "The panchangam documents don't cover this. Try asking about a date, a tithi, a festival, rasi predictions or a ritual." }));
-    return li;
-  }
   if (a.citations?.length) {
     const list = el("ul", { class: "sources", "aria-label": "Sources" });
     for (const c of a.citations) {
@@ -205,7 +201,7 @@ function renderAnswer(a, { animate = false } = {}) {
     }
     li.append(list);
   }
-  const note = METHOD_NOTE[a.method];
+  const note = a.abstained ? null : METHOD_NOTE[a.method];
   if (note) li.append(el("p", { class: "answer-meta", text: a.latency_ms ? `${note}, in ${duration(a.latency_ms)}` : note }));
   if (animate) li.scrollIntoView?.({ block: "nearest" });
   return li;

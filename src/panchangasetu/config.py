@@ -54,7 +54,6 @@ class Settings(BaseSettings):
     ocr_batch_pages: int = Field(10, ge=1, le=20)
 
     sarvam_api_key: SecretStr | None = Field(default=None, validation_alias="SARVAM_API_KEY")
-    openai_api_key: SecretStr | None = Field(default=None, validation_alias="OPENAI_API_KEY")
     # Google AI Studio key (Gemini); GOOGLE_API_KEY is accepted too.
     gemini_api_key: SecretStr | None = Field(
         default=None, validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY")
@@ -78,10 +77,8 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: SecretStr | None = None
     index_prefix: str = "psetu"
-    embedding_provider: Literal["fastembed", "openai"] = "fastembed"
     # Chosen by the Phase 3 bake-off: best cross-lingual recall.
     embedding_model: str = "intfloat/multilingual-e5-large"
-    openai_embedding_dimensions: int | None = None
     model_cache_dir: Path = Path("data/models")
     index_section_gloss: bool = True
     retrieval_top_k: int = Field(8, ge=1, le=50)
@@ -98,9 +95,8 @@ class Settings(BaseSettings):
 
     # --- answer generation ---
     # Providers tried in order; out-of-credits or outages fall through to the next one.
-    llm_providers: list[Literal["sarvam", "gemini", "openai"]] = ["sarvam", "gemini", "openai"]
+    llm_providers: list[Literal["sarvam", "gemini"]] = ["sarvam", "gemini"]
     sarvam_chat_model: str = "sarvam-105b-conversations"  # no reasoning: fast, cheap (Phase 5 probe)
-    openai_chat_model: str = "gpt-4.1-mini"
     # gemini-3.8-flash is the newest Flash but was overloaded (503 "high demand") on 2026-11-08; 3.6 is the
     # same price and answered in ~2 s. Switch back with PSETU_GEMINI_CHAT_MODEL once 3.8 is stable.
     gemini_chat_model: str = "gemini-3.6-flash"
@@ -111,7 +107,7 @@ class Settings(BaseSettings):
     # Tried once when the primary cannot produce a verified answer although sources were found (hard
     # list lookups, complex rules). Gemini answered 16/19 held-out questions to Sarvam's 13 at ~4.5x the
     # cost (2026-11-08 benchmark), so only those questions pay for it. "" disables escalation.
-    escalation_provider: Literal["", "gemini", "openai", "sarvam"] = "gemini"
+    escalation_provider: Literal["", "gemini", "sarvam"] = "gemini"
     # Used when escalation_provider is "sarvam": reasons, ~20 s and ~₹0.3 per answer, and on large
     # prompts needs >4k reasoning tokens (Phase 5 probe).
     escalation_model: str = "sarvam-105b"

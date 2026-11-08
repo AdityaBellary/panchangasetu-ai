@@ -352,3 +352,45 @@ def test_month_and_year_is_not_read_as_a_date() -> None:
         "2026-11-20",
         "2026-12-05",
     }
+
+
+# ------------------------------------------------------------------ friendlier refusals
+def test_a_day_question_the_book_has_no_rule_for_gets_that_days_panchangam() -> None:
+    from panchangasetu.generation.prompts import DAY_INTRO_EN
+
+    festival = Evidence(
+        "e1",
+        "event",
+        "panchanga",
+        "[TTD festival calendar, 2026-11-07 Saturday] కేదారగౌరీ వ్రతం (Source: book.pdf p.159)",
+        "book.pdf",
+        [159],
+        date="2026-11-07",
+    )
+
+    class Calendar:
+        def events(self, start: object, end: object) -> list[Evidence]:
+            return [festival]
+
+    svc = service([day_ev()], FakeLLM([reply("", sufficient=False)]), PanchangaMode.DAY, Intent.PANCHANGA)
+    svc.retriever.structured = Calendar()  # type: ignore[attr-defined]
+    a = svc.ask("Is today good to start a new business?")
+    assert a.abstained and a.answer.startswith(DAY_INTRO_EN)
+    assert "Tithi:" in a.answer and "Saturday, 07 November 2026" in a.answer
+    assert "Festivals and observances that day: కేదారగౌరీ వ్రతం" in a.answer
+    assert [c.pages for c in a.citations] == [[131], [159]]
+
+
+def test_refusal_when_the_llm_is_down_says_so_instead_of_not_found() -> None:
+    from panchangasetu.core.interfaces import LLMError
+    from panchangasetu.generation.prompts import UNAVAILABLE_TE
+
+    a = service([PROSE], FakeLLM([LLMError("503", retryable=True)]), lang="te").ask("బల్లి తల మీద?")
+    assert a.abstained and a.answer == UNAVAILABLE_TE
+
+
+def test_a_plain_day_question_is_not_escalated() -> None:
+    escalation = FakeLLM([reply("x")])
+    svc = service([day_ev()], FakeLLM([reply("", sufficient=False)]), PanchangaMode.DAY, Intent.PANCHANGA)
+    svc.escalation = escalation  # type: ignore[assignment]
+    assert svc.ask("Is today good for a new business?").abstained and escalation.calls == 0

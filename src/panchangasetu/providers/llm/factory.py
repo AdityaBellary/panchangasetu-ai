@@ -8,7 +8,6 @@ from panchangasetu.providers.llm.openai_compatible import (
     FallbackLLM,
     OpenAICompatibleChat,
     gemini_chat,
-    openai_chat,
     sarvam_chat,
 )
 
@@ -29,8 +28,6 @@ def _chain(name: str, settings: Settings, **common: object) -> list[OpenAICompat
             )
             for model in dict.fromkeys([settings.gemini_chat_model, *settings.gemini_fallback_models])
         ]
-    if name == "openai" and (key := _key(settings.openai_api_key)):
-        return [openai_chat(key, settings.openai_chat_model, **common)]
     return []
 
 

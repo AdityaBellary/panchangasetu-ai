@@ -8,8 +8,28 @@ from datetime import datetime
 from panchangasetu.core.interfaces import ChatMessage
 from panchangasetu.retrieval.evidence import Evidence
 
-ABSTAIN_EN = "I don't have enough information in the available documents to answer this question accurately."
-ABSTAIN_TE = "అందుబాటులో ఉన్న పత్రాలలో ఈ ప్రశ్నకు ఖచ్చితంగా సమాధానం ఇవ్వడానికి తగినంత సమాచారం లేదు."
+# Refusals say what happened and what the app *can* answer, in the user's language.
+ABSTAIN_EN = (
+    "I couldn't find this in the TTD panchangam, so I'd rather not guess.\n\n"
+    "I can tell you: the panchangam for any day (tithi, nakshatram, rahukalam), when the next Ekadashi "
+    "or Pournami is, festival dates, muhurthams, and this year's rasi phalalu."
+)
+ABSTAIN_TE = (
+    "ఈ విషయం టీటీడీ పంచాంగంలో దొరకలేదు, అందుకే ఊహించి చెప్పలేను.\n\n"
+    "నేను చెప్పగలిగేవి: ఏ రోజుకైనా పంచాంగం (తిథి, నక్షత్రం, రాహుకాలం), తదుపరి ఏకాదశి లేదా పౌర్ణమి "
+    "ఎప్పుడు, పండుగ తేదీలు, ముహూర్తాలు, ఈ సంవత్సరం రాశి ఫలాలు."
+)
+# A question about a specific day the book has no rule for ("is tomorrow good for a new business?"):
+# the day's panchangam follows, so the user (or their priest) can judge.
+DAY_INTRO_EN = (
+    "The panchangam doesn't answer this directly, so I won't guess. "
+    "Here is that day's panchangam to help you, or your priest, decide:"
+)
+DAY_INTRO_TE = (
+    "ఈ ప్రశ్నకు పంచాంగంలో నేరుగా సమాధానం లేదు, అందుకే ఊహించి చెప్పలేను. మీరు లేదా మీ పురోహితులు నిర్ణయించుకోవడానికి ఆ రోజు పంచాంగం ఇదిగో:"
+)
+UNAVAILABLE_EN = "Sorry, I couldn't reach the answering service just now. Please ask again in a minute."
+UNAVAILABLE_TE = "క్షమించండి, ఇప్పుడు సమాధాన సేవ అందుబాటులో లేదు. ఒక నిమిషం తరువాత మళ్ళీ అడగండి."
 # The daily LLM budget is used up: calendar lookups (templates) still work.
 BUDGET_EN = (
     "Today's limit for detailed answers has been reached. Calendar questions (tithi, nakshatram, "

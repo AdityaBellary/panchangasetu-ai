@@ -1,4 +1,4 @@
-"""Chat completions over HTTP for OpenAI-compatible APIs: Sarvam, Gemini (AI Studio) and OpenAI.
+"""Chat completions over HTTP for OpenAI-compatible APIs: Sarvam and Gemini (AI Studio).
 
 Verified 2026-11-07:
   Sarvam  POST https://api.sarvam.ai/v1/chat/completions  header `api-subscription-key`
@@ -6,8 +6,6 @@ Verified 2026-11-07:
           `sarvam-105b`: always reasons (reasoning_effort low|medium|high, cannot be disabled);
           reasoning tokens consume max_tokens and are billed as output.
           402 = credits exhausted.
-  OpenAI  POST https://api.openai.com/v1/chat/completions  header `Authorization: Bearer`
-          429 with code insufficient_quota / credit_balance_exhausted = credits exhausted.
   Gemini  POST https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
           header `Authorization: Bearer`
           (docs checked 2026-11-08). Gemini 3 models always think (`reasoning_effort` minimal|low|medium|high
@@ -206,16 +204,6 @@ def gemini_chat(
         extra_body={"reasoning_effort": reasoning_effort} if reasoning_effort else None,
         json_mode=False,
         thinking_headroom=2048,
-        **kw,
-    )
-
-
-def openai_chat(api_key: str, model: str = "gpt-4.1-mini", **kw: Any) -> OpenAICompatibleChat:
-    return OpenAICompatibleChat(
-        name="openai",
-        model=model,
-        base_url="https://api.openai.com/v1",
-        headers={"Authorization": f"Bearer {api_key}"},
         **kw,
     )
 

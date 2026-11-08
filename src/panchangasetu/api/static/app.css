@@ -184,7 +184,6 @@ a.btn-quiet { text-decoration: none; display: block; }
 .answer-text p:last-child { margin-bottom: 0; }
 .answer-note { font-size: 0.88rem; color: var(--slate); }
 .turn-a.abstained .answer-text { border-left: 3px solid var(--kumkum); padding: 0.15rem 0 0.15rem 0.85rem; }
-.abstain-hint { margin: 0.45rem 0 0 0.95rem; font-size: 0.86rem; color: var(--slate); }
 
 .sources { margin: 0.85rem 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .source {

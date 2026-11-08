@@ -34,7 +34,7 @@ services:
   api:
     build: .
     image: panchangasetu:local
-    env_file: .env  # SARVAM_API_KEY / OPENAI_API_KEY and any PSETU_* overrides
+    env_file: .env  # SARVAM_API_KEY / GEMINI_API_KEY and any PSETU_* overrides
     environment:
       PSETU_DATABASE_URL: postgresql+psycopg://psetu:psetu@postgres:5432/psetu
       PSETU_QDRANT_URL: http://qdrant:6333

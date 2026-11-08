@@ -15,7 +15,7 @@ import re
 import time
 from contextlib import nullcontext
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from itertools import zip_longest
 from typing import Any
 
@@ -25,6 +25,10 @@ from panchangasetu.generation.prompts import (
     ABSTAIN_TE,
     BUDGET_EN,
     BUDGET_TE,
+    DAY_INTRO_EN,
+    DAY_INTRO_TE,
+    UNAVAILABLE_EN,
+    UNAVAILABLE_TE,
     build_messages,
     retry_feedback,
 )
@@ -46,6 +50,7 @@ log = get_logger(__name__)
 # Full chunks (Telugu runs ~1.5-2k characters per chunk) beat many truncated ones: cutting a chunk
 # can drop exactly the sentence that answers the question.
 _MAX_EVIDENCE = 5
+_MAX_REFUSAL_DAYS = 3  # "is next week good for…?" shows at most three days
 # Answers to the question as asked (a day's facts, the next occurrence, a weekday period). Dated
 # events and daily notes are search results like passages: for "rain in Chaitra masam" they must not
 # crowd out the General text that answers it.
@@ -124,6 +129,12 @@ def _source(e: Evidence) -> dict[str, Any]:
     }
 
 
+def _event_name(e: Evidence) -> str:
+    """The festival text of an event, without its "[TTD festival calendar, date]" label and source."""
+    body = e.text.split("] ", 1)[-1]
+    return re.sub(r"\s*\(Source: [^)]*\)\s*$", "", body).strip()
+
+
 def _citation(e: Evidence) -> Citation:
     return Citation(e.document, e.pages, e.date, e.verified, e.text[:240])
 
@@ -177,10 +188,46 @@ class AnswerService:
         with collect_calls() as calls:
             r = self.retriever.retrieve(question, now=now, language=language)
             answer = self._respond(question, r, now, t0, allow_llm)
+        if answer.abstained:
+            self._helpful_refusal(answer, r)
         apply_calls(answer, calls)
         answer.sources = [_source(e) for e in select_evidence(r.evidence, _MAX_EVIDENCE)]
         answer.latency_ms |= {f"retrieve_{k}": round(v, 1) for k, v in r.timings_ms.items() if k != "total"}
         return answer
+
+    def _helpful_refusal(self, answer: Answer, r: RetrievalResult) -> None:
+        """A refusal still helps: for a question about a day, show that day's panchangam (with
+        rahukalam and the festivals printed for it) instead of a bare "I don't know"."""
+        te = answer.language == "te"
+        if "budget" in answer.reason:
+            intro = BUDGET_TE if te else BUDGET_EN
+        elif "unavailable" in answer.reason:
+            intro = UNAVAILABLE_TE if te else UNAVAILABLE_EN
+        else:
+            intro = DAY_INTRO_TE if te else DAY_INTRO_EN
+        days = [e for e in r.evidence if e.kind == "day"][:_MAX_REFUSAL_DAYS]
+        if r.route.mode != PanchangaMode.DAY or not days:
+            if "unavailable" in answer.reason:
+                answer.answer = intro  # the budget and not-found texts are already set
+            return
+        periods = getattr(self.retriever, "weekday_periods", None)
+        structured = getattr(self.retriever, "structured", None)
+        extra: list[Evidence] = []
+        events: list[Evidence] = []
+        for e in days:
+            d = date.fromisoformat(e.date or "")
+            if periods is not None:
+                extra += [periods.evidence(k, d) for k in sorted(periods.kinds)]
+            if structured is not None:
+                events += structured.events(d, d)
+        attrs = ["panchangam", *sorted(periods.kinds if periods is not None else ())]
+        blocks = [intro, render_day_answers(days + extra, attrs, answer.language)]
+        if events:
+            names = list(dict.fromkeys(_event_name(e) for e in events))
+            label = "ఆ రోజు పండుగలు / విశేషాలు" if te else "Festivals and observances that day"
+            blocks.append(f"{label}: " + "; ".join(names))
+        answer.answer = "\n\n".join(blocks)
+        answer.citations = [_citation(e) for e in days + events]
 
     def _respond(
         self, question: str, r: RetrievalResult, now: datetime, t0: float, allow_llm: bool
@@ -265,6 +312,9 @@ class AnswerService:
             and "unavailable" not in first.reason
             # The primary chain already fell through to the escalation model (e.g. Sarvam out of credits).
             and first.model not in _models(self.escalation)
+            # Only the day's table to go on ("is tomorrow good for a new business?"): a stronger model
+            # can't find a rule that isn't there. The refusal shows the day's panchangam instead.
+            and not (r.route.mode == PanchangaMode.DAY and not r.route.wants_general)
         ):
             log.info("answer.escalate", reason=first.reason)
             with call_purpose("escalation"):

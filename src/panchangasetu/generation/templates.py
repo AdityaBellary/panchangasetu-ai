@@ -181,7 +181,8 @@ def render_day_answer(ev: Evidence, attributes: list[str], lang: str) -> str:
             spans = [f"{_en_time(w['starts_at'], d)} to {_en_time(w['ends_at'], d)}" for w in ws]
         lines.append(f"{label}: {'; '.join(spans)}.")
     if "sunrise" in wanted or "sunset" in wanted:
-        sr, ss = ev.data.get("sunrise"), ev.data.get("sunset")
+        # Printed as "6-14"; shown as a clock time.
+        sr, ss = (str(ev.data.get(k) or "").replace("-", ":") for k in ("sunrise", "sunset"))
         lines.append(
             f"సూర్యోదయం {sr}, సూర్యాస్తమయం {ss} (పత్రంలో ముద్రించినట్లు)."
             if lang == "te"

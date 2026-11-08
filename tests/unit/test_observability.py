@@ -209,7 +209,7 @@ def test_escalation_uses_the_gemini_chain_by_default(monkeypatch: pytest.MonkeyP
     from panchangasetu.config import Settings
     from panchangasetu.providers.llm.factory import build_escalation_llm
 
-    for var in ("SARVAM_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"):
+    for var in ("SARVAM_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     settings = Settings(_env_file=None)  # type: ignore[call-arg]

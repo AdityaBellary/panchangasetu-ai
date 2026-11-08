@@ -1,13 +1,12 @@
 # LLM prices per 1M tokens, used to put a ₹ cost on every recorded call. Reasoning ("thinking")
 # tokens are billed as output. Check providers' pricing pages and update when they change.
 #   Sarvam: INR, pricing page 2026-11-07.
-#   OpenAI / Gemini: USD, converted with usd_to_inr. Gemini Flash prices double on 2027-01-01.
+#   Gemini: USD, converted with usd_to_inr. Gemini Flash prices double on 2027-01-01.
 usd_to_inr: 88.0
 default: {input_inr: 15, output_inr: 60}   # unknown models are costed like Sarvam
 models:
   sarvam-105b-conversations: {input_inr: 15, output_inr: 60}
   sarvam-105b: {input_inr: 15, output_inr: 60}
-  gpt-4.1-mini: {input_usd: 0.40, output_usd: 1.60}
   gemini-3.8-flash: {input_usd: 0.75, output_usd: 3.75}
   gemini-3.7-flash: {input_usd: 0.75, output_usd: 3.75}
   gemini-3.6-flash: {input_usd: 0.75, output_usd: 3.75}
